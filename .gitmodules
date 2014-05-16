@@ -1,0 +1,3 @@
+[submodule "deps/csnips"]
+	path = deps/csnips
+	url = https://github.com/haneefmubarak/csnips
