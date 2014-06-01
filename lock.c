@@ -123,3 +123,13 @@ int unlock_reader (arena_lock *lock) {
 	unlock_al (lock);
 	return 0;	// success
 }
+
+int unlock_writer (arena_lock *lock) {
+	// get an exclusive lock on the lock structure
+	lock_al (lock);
+
+	lock->op = ARENA_OP_NONE;
+
+	unlock_al (lock);
+	return 0;
+}
