@@ -3,7 +3,7 @@
 // ===
 
 // get an excl lock on the lock structure
-static inline lock_al (arena_lock *lock) {
+static inline int lock_al (arena_lock *lock) {
 	int access = 0;
 
 	// quick spinlock (ironically enough, to access the lock)
@@ -15,7 +15,7 @@ static inline lock_al (arena_lock *lock) {
 }
 
 // force a memory fence and then unlock the structure
-static inline unlock_al (arena_lock *lock) {
+static inline int unlock_al (arena_lock *lock) {
 	__sync_synchronize ();
 	return  __sync_bool_compare_and_swap (&(lock->access), (int) 1, (int) 0);
 }
