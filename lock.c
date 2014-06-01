@@ -73,6 +73,46 @@ int lock_reader (arena_lock *lock) {
 	return 0;	// false
 }
 
+int lock_writer (arena_lock *lock) {
+	// get an exclusive lock on the lock structure
+	lock_al (lock);
+
+	// see if a reader is waiting on it
+	if (lock->wait.r) {
+		unlock_al (lock);
+		return 0;	// false
+	}
+
+	// see who is doing an op on it
+	switch (lock->op) {
+		case ARENA_OP_NONE:	// not in use
+			lock->op = ARENA_OP_WRITER;
+
+			unlock_al (lock);
+			return 1;	// true
+
+		case ARENA_OP_READER:	// a reader is using it
+			lock->wait.w = 1;
+
+			unlock_al (lock);
+			return 0;	// false
+
+		case ARENA_OP_WRITER:	// another writer is using it - ah well
+			unlock_al (lock);
+			return 0;	// false
+
+		default:
+			__builtin_unreachable ();
+			unlock_al (lock);
+			return 0;	// false
+	}
+
+	__builtin_unreachable ();
+	return 0;	// false
+}
+
+// ===
+
 int unlock_reader (arena_lock *lock) {
 	// get an exclusive lock on the lock structure
 	lock_al (lock);
