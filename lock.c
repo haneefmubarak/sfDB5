@@ -43,14 +43,7 @@ int lock_reader (arena_lock *lock) {
 
 			return 1;	// true
 
-		case ARENA_OP_READER:	// a writer is using it
-			lock->wait.r = 1;	// notify the next writer that
-						// another thread wants to read
-			unlock_al (lock);
-
-			return 0;	// false
-
-		case ARENA_OP_WRITER:	// another reader is using it -- perfect
+		case ARENA_OP_READER:	// another reader is using it -- perfect
 			// check for excessive readers
 			if (lock->reader_count < ARENA_MAX_READER_COUNT) {
 				lock->reader_count++;
@@ -62,6 +55,13 @@ int lock_reader (arena_lock *lock) {
 
 				return 0;	// false
 			}
+
+		case ARENA_OP_WRITER:	// a writer is using it
+			lock->wait.r = 1;	// notify the next writer that
+						// another thread wants to read
+			unlock_al (lock);
+
+			return 0;	// false
 
 		default:
 			__builtin_unreachable ();
