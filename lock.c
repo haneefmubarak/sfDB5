@@ -29,7 +29,6 @@ int lock_reader (arena_lock *lock) {
 	// if writer wants it, leave it be
 	if (lock->wait.w) {
 		unlock_al (lock);
-
 		return 0;	// false
 	}
 
@@ -40,19 +39,17 @@ int lock_reader (arena_lock *lock) {
 			lock->reader_count = 1;
 
 			unlock_al (lock);
-
 			return 1;	// true
 
 		case ARENA_OP_READER:	// another reader is using it -- perfect
 			// check for excessive readers
 			if (lock->reader_count < ARENA_MAX_READER_COUNT) {
 				lock->reader_count++;
-				unlock_al (lock);
 
+				unlock_al (lock);
 				return 1;	// true
 			} else {
 				unlock_al (lock);
-
 				return 0;	// false
 			}
 
@@ -60,7 +57,6 @@ int lock_reader (arena_lock *lock) {
 			lock->wait.r = 1;	// notify the next writer that
 						// another thread wants to read
 			unlock_al (lock);
-
 			return 0;	// false
 
 		default:
