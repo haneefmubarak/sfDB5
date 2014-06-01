@@ -6,5 +6,3 @@
 #include <assert.h>
 
 #include <unistd.h>
-
-#include <event.h>
