@@ -6,3 +6,7 @@
 #include <assert.h>
 
 #include <unistd.h>
+
+// ===
+
+#include "lock.h"
