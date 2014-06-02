@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 
+// ===
+// locking (lock.c)
+
 #define ARENA_MAX_READER_COUNT 16
 
 #define ARENA_OP_NONE	0
@@ -23,3 +26,5 @@ int lock_writer (arena_lock *);	// exclsv, hi prio
 
 int unlock_reader (arena_lock *);	// shared, lo prio
 int unlock_writer (arena_lock *);	// exclsv, hi prio
+
+// ===
