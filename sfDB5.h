@@ -8,5 +8,3 @@
 #include <unistd.h>
 
 // ===
-
-#include "atomic.h"
