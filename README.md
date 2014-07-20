@@ -1,33 +1,50 @@
 sfDB5
 =====
 
-`sfDB5` aims to do many things similar to what `sfDB2` tried to
-achieve, in somewhat similar ways:
+Have a look at the [transcribed talk](https://smarturl.it/sfDB5-talk).
 
- - Process requests extremely quickly by allowing only simple
-   requests
- - Process requests even faster by interlacing requests as they
-   come in and are processed
- - Use various techniques to allow the kernel to swap pages that
-   are not being used out and quickly load them back in
- - Ensure that the maximum performance is pulled out of a single
-   machine by scaling efficiently across threads, cores, memory,
-   and also swap so that, even on a multi-GigE network pipe the
-   network is the limiting factor
+---
 
-... and then it does some things slightly differently:
+sfDB5 has three main inspirations:
 
- - Use a **hash** tree using the **BLAKE2** hash to provide high
-   speed lookups with virtually no collisions
- - Make read requests much much faster than write requests using
-   **file level specialized allocation trees**
+ - Inspiration I: Data Dependent Queries
 
-... and finally introduces some new concepts (compared to sfDB2):
+   Solve recursion. In other words, instead of you recursing
+   client-side and fetching data over and over again, you can
+   just send the server a path string (similar to C's memory access
+   syntax) and it'll do the recursion **within the cluster**. This is
+   not only faster but is also (IMHO) easier to do.
 
- - Provide a new kind of NoSQL database: a key-structure store
- - Accelerate filesystem accesses by allowing the use of multiple
-   files to store data (ie - multiple disks)
- - Use parity or a hash to ensure data is stored correctly
+ - Inspiration II: Ease of Use
+
+   Three of the top NoSQL databases today aren't **as easy
+   to use as a database should be**. One isn't exactly trivial
+   to administer, another requires you to learn a query language
+   (isn't that part of what we wanted to escape with NoSQL?), and
+   the final one requires you to do manual parsing.
+
+   sfDB5 should have everything necessary in the box. Cluster
+   administration is just adding and removing servers - sfDB5
+   will take care of the rest. There's no fancy query language,
+   just simple path strings and standard functions. Parsing isn't
+   a thing either. sfDB5 has its own efficient internal representation,
+   but it'll just spit out a **string, blob, integer or float** when you
+   ask it for data.
+
+ - Inspiration III: Atomic Operations
+
+   Serverside atomic operations like basic arithmetic, bitwise,
+   and shift operations are quite useful, especially in synchronization.
+   While **all sfDB5 operations are atomic**, these additional functions
+   can perform as basic synchronization primitives, especially seeing as
+   that sfDB5 does not support external locking.
+
+Contributing and/or Sponsoring
+------------------------------
+
+See [HelpOut.md](HelpOut.md).
+
+---
 
 `sfDB5` is inspired by Redis and Couchbase, and is licensed under
 the MIT license.
