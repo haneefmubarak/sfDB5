@@ -14,12 +14,12 @@ uint8_t *load (size_t len, char *path, int *fd, int *err) {
 		err[0] |= 0x02;	// not a regular or block file
 	if (access (path, R_OK | W_OK) || !access (path, X_OK))
 		err[0] |= 0x04;	// bad permissions
-	if (statbuf.st_size != (typeof (statbuf.st_size)) len)
-		err[0] |= 0x08;	// file size does not match given size
+	if (statbuf.st_size < (typeof (statbuf.st_size)) len)
+		err[0] |= 0x08;	// file size is greater than given size
 	if (len % DRIVE_MULSZ)
-		err[0] |= 0x16;	// file size is not a multiple of constant
+		err[0] |= 0x16;	// given size is not a multiple of constant
 	if (len < DRIVE_MINSZ)
-		err[0] |= 0x32;	// file size is less than minimum size
+		err[0] |= 0x32;	// given size is less than minimum size
 
 	if (err[0])
 		return NULL;
