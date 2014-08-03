@@ -1,10 +1,4 @@
-#include <stdint.h>
-
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/file.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
+#include "drive.h"
 
 uint8_t *load (size_t len, char *path, int *fd, int *err) {
 	err[0] = 0;	// stat errors
@@ -20,10 +14,12 @@ uint8_t *load (size_t len, char *path, int *fd, int *err) {
 		err[0] |= 0x02;	// not a regular or block file
 	if (access (path, R_OK | W_OK) || !access (path, X_OK))
 		err[0] |= 0x04;	// bad permissions
-	if (statbuf.st_size != len)
+	if (statbuf.st_size != (typeof (statbuf.st_size)) len)
 		err[0] |= 0x08;	// file size does not match given size
-	if (len % 4096)
-		err[0] |= 0x16;	// file size is not a multiple of 4K
+	if (len % DRIVE_MULSZ)
+		err[0] |= 0x16;	// file size is not a multiple of constant
+	if (len < DRIVE_MINSZ)
+		err[0] |= 0x32;	// file size is less than minimum size
 
 	if (err[0])
 		return NULL;
