@@ -115,5 +115,3 @@ int initialize (size_t len, uint8_t *map) {
 
 	return 0;
 }
-
-
