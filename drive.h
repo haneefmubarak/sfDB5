@@ -3,9 +3,11 @@
 //===	Includes
 
 #include <stdint.h>
+#include <string.h>
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <sys/file.h>
 #include <sys/mman.h>
 #include <sys/stat.h>

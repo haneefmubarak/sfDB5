@@ -8,6 +8,9 @@ endif
 CFLAGS = -O2 -march=native -mtune=native -Wall -Wextra
 LFLAGS =
 
+## Extra Flags
+CFLAGS += -pthread
+
 # OS Dependent Flags
 UNAME_S = $(shell uname -s)
 ## gcc OSX assembly fix

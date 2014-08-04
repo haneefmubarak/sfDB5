@@ -57,3 +57,63 @@ void unload (size_t len, uint8_t *map, int fd) {
 
 	return;
 }
+
+//---
+
+typedef union {
+	size_t	len;
+	uint8_t	*map;
+} initArgs;
+
+static void * tzero (void *ptr) {
+	initArgs *args = ptr;
+
+	memset (args->map, 0x00, args->len);
+
+	return NULL;
+}
+
+int initialize (size_t len, uint8_t *map) {
+	int err = 0;
+
+	// checks
+	if (len % DRIVE_MULSZ)
+		err |= 0x16;	// given size is not a multiple of constant
+	if (len < DRIVE_MINSZ)
+		err |= 0x32;	// given size is less than minimum size
+
+	if (err)
+		return err;
+
+	// zero out the image
+	int cpus = sysconf (_SC_NPROCESSORS_ONLN);	// get number of cpus
+	cpus /= 2;	// don't use all of the cpus
+	while (len % cpus)
+		cpus--;	// get a number we can divide the drive into
+
+	int chunklen = len / cpus;	// get the length of each thread's chunk
+
+	pthread_t thread[cpus];
+	initArgs args[cpus];
+	int status = 0, x;
+	for (x = 0; x < cpus; x++) {
+		args[x].len = chunklen;
+		args[x].map = &map[x * chunklen];	// assign a range for the thread to zero
+		status |= pthread_create (&thread[x], NULL, tzero, &args[x]);
+	}
+
+	if (status)	// thread creation failed somewhere
+		memset (map, 0x00, len);	// do it ourselves
+	else		// expected operation
+		for (x = 0; x < cpus; x++)
+			pthread_join (thread[x], NULL);
+
+	// add magic to files
+	const int arenalen = len / 256;
+	for (x = 0; x < 256; x++)
+		strcpy ((char *) &map[x * arenalen], "sfDB5v0.dev");
+
+	return 0;
+}
+
+
