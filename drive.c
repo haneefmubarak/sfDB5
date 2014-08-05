@@ -68,7 +68,7 @@ typedef union {
 static void * tzero (void *ptr) {
 	initArgs *args = ptr;
 
-	memset (args->map, 0x00, args->len);
+	memset (args->map, 0x00, args->len);	// zero memory
 
 	return NULL;
 }
@@ -106,7 +106,7 @@ int initialize (size_t len, uint8_t *map) {
 		memset (map, 0x00, len);	// do it ourselves
 	else		// expected operation
 		for (x = 0; x < cpus; x++)
-			pthread_join (thread[x], NULL);
+			pthread_join (thread[x], NULL);	// wait for threads to complete execution
 
 	// add magic to files
 	const int arenalen = len / 256;
