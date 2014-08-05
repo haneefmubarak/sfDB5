@@ -11,6 +11,8 @@
 
 #include <unistd.h>
 
+#include "xm.h"
+
 //===	Defines
 
 
