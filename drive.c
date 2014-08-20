@@ -1,6 +1,6 @@
 #include "drive.h"
 
-xmattr_malloc uint8_t *load (size_t len, char *path, int *fd, int *err) {
+xmattr_malloc uint8_t *drive_load (size_t len, char *path, int *fd, int *err) {
 	err[0] = 0;	// stat errors
 	err[1] = 0;	// open / lock / mmap errors
 
@@ -45,7 +45,7 @@ xmattr_malloc uint8_t *load (size_t len, char *path, int *fd, int *err) {
 	return map;
 }
 
-void unload (size_t len, uint8_t *map, int fd) {
+void drive_unload (size_t len, uint8_t *map, int fd) {
 	// unmap
 	munmap (map, len);
 
@@ -73,7 +73,7 @@ static void * tzero (void *ptr) {
 	return NULL;
 }
 
-int initialize (size_t len, uint8_t *map) {
+int drive_initialize (size_t len, uint8_t *map) {
 	int err = 0;
 
 	// checks
