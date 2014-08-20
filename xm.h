@@ -17,3 +17,5 @@
 
 #define xm_likely(x)	__builtin_expect(!!(x), 1)
 #define xm_unlikely(x)	__builtin_expect(!!(x), 0)
+
+#define xm_tlv	__thread
