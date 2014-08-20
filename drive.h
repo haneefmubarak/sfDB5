@@ -22,3 +22,12 @@
 #define DRIVE_MULSZ	(256LL * DRIVE_BLKSZ)
 // minimum size for the drive
 #define DRIVE_MINSZ	(8LL * DRIVE_MULSZ)
+
+//=== Functions
+
+// load a drive into memory
+xmattr_malloc uint8_t *drive_load (size_t len, char *path, int *fd, int *err);
+// unload a drive from memory
+void drive_unload (size_t len, uint8_t *map, int fd);
+// initialize a new drive
+int drive_initialize (size_t len, uint8_t *map);
