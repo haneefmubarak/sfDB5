@@ -15,7 +15,7 @@
 
 //===	Variables
 
-xm_tlv	int32_t pd_arena;
+extern xm_tlv	int32_t pd_arena;
 
 //===	Functions
 
