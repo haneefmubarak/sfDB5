@@ -13,6 +13,11 @@
 #include <sys/stat.h>
 
 #include "sfDB5.h"
+#include "pd.h"
+
+//===	Variables
+
+extern		int8_t drive_count;
 
 //===	Defines
 

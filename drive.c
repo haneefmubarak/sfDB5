@@ -1,5 +1,7 @@
 #include "drive.h"
 
+int8_t drive_count = 0;
+
 xmattr_malloc uint8_t *drive_load (size_t len, char *path, int *fd, int *err) {
 	err[0] = 0;	// stat errors
 	err[1] = 0;	// open / lock / mmap errors
@@ -108,10 +110,14 @@ int drive_initialize (size_t len, uint8_t *map) {
 		for (x = 0; x < cpus; x++)
 			pthread_join (thread[x], NULL);	// wait for threads to complete execution
 
-	// add magic to files
-	const int arenalen = len / 256;
-	for (x = 0; x < 256; x++)
-		strcpy ((char *) &map[x * arenalen], "sfDB5v0.dev");
+	// - add magic to files
+	// - add arenas to global arena LUT
+	const int arenalen	= len / 256;
+	for (x = 0; x < 256; x++) {
+		void *curmap = &map[x * arenalen];	// calculate offsetted address
+		pd_arenaLUT[x + (drive_count * 256)] = curmap;	// add to global LUT
+		strcpy (curmap, "sfDB5v0.dev");		// add magic arena header
+	}
 
 	return 0;
 }
