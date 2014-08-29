@@ -110,14 +110,19 @@ int drive_initialize (size_t len, uint8_t *map) {
 		for (x = 0; x < cpus; x++)
 			pthread_join (thread[x], NULL);	// wait for threads to complete execution
 
-	// - add magic to files
+
 	// - add arenas to global arena LUT
+	pd_arenaLUT = realloc (pd_arenaLUT, sizeof (void *) * (drive_count + 1) * 256);
+	if (!pd_arenaLUT)
+		return 0x01;	// memory allocation failure
+	// - add magic to files
 	const int arenalen	= len / 256;
 	for (x = 0; x < 256; x++) {
 		void *curmap = &map[x * arenalen];	// calculate offsetted address
 		pd_arenaLUT[x + (drive_count * 256)] = curmap;	// add to global LUT
 		strcpy (curmap, "sfDB5v0.dev");		// add magic arena header
 	}
+	drive_count++;
 
 	return 0;
 }
