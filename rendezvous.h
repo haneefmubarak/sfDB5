@@ -6,10 +6,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ifndef MAX
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
-#endif
-
 typedef struct {
 	__uint128_t val;
 	int bin;
