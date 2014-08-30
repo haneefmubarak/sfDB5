@@ -3,18 +3,26 @@
 // http://git.io/pgkqvw
 // (haneefmubarak/experiments/rendezvous)
 
+//===	Includes
+
 #include <stdint.h>
 #include <stdlib.h>
+
+//===	Structures
 
 typedef struct {
 	__uint128_t val;
 	int bin;
 } rdv;
 
+//===	Special
+
 #define SORT_NAME rendezvous
 #define SORT_TYPE rdv
 #define SORT_CMP(x, y) ((((rdv)x).val) - (((rdv)y).val))
 #include "./deps/sort/sort.h"
+
+//===	Functions
 
 static inline int *rendezvous (__uint128_t *pool, uint64_t id, int nodes) {
 
