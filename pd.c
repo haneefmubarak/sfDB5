@@ -3,9 +3,11 @@
 xm_tlv int32_t	pd_arena;
 void		**pd_arenaLUT = NULL;
 
-xmattr_malloc void *pd_emalloc	(size_t size, int32_t pd_arena) {
-	
+void * pd_init (void *ptr) {
+	pd_arena = (pdInit_args) ptr->arena;
 }
+
+xmattr_malloc void *pd_emalloc	(size_t size, int32_t pd_arena);
 
 
 xmattr_malloc void *pd_ecalloc	(size_t count, size_t size, int32_t pd_arena);

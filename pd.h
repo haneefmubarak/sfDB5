@@ -13,12 +13,21 @@
 
 #include "sfDB5.h"
 
+//===	Structures
+
+struct pdInit_args {
+	int32_t arena;
+}
+
 //===	Variables
 
 extern xm_tlv	int32_t pd_arena;
 extern		void **pd_arenaLUT;
 
 //===	Functions
+
+// initialize an arena
+void * pd_init (void *ptr);
 
 // require arena specification
 xmattr_malloc void *pd_emalloc	(size_t size, int32_t pd_arena);
