@@ -17,9 +17,15 @@ typedef struct {
 
 //===	Special
 
+static inline int cmp_rdv (const void *arg1, const void* arg2) {
+	const rdv* lhs = arg1;
+	const rdv* rhs = arg2;
+	return (lhs->val < rhs->val) ? -1 : (rhs->val < lhs->val);
+}
+
 #define SORT_NAME rendezvous
 #define SORT_TYPE rdv
-#define SORT_CMP(x, y) ((((rdv)x).val) - (((rdv)y).val))
+#define SORT_CMP(x, y) cmp_rdv (&x, &y)
 #include "./deps/sort/sort.h"
 
 //===	Functions
