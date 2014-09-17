@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 
 #include "sfDB5.h"
+#include "mapped.h"
 #include "pd.h"
 
 //===	Variables
@@ -21,7 +22,7 @@ extern		int8_t drive_count;
 
 //===	Defines
 
-// the block size for the drive
+// the min block size for the drive
 #define DRIVE_BLKSZ	(VALUE_MAXLEN)
 // whatever drive is used must be a multiple of this value
 #define DRIVE_MULSZ	(256LL * DRIVE_BLKSZ)

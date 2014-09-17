@@ -12,42 +12,24 @@
 #include <sys/stat.h>
 
 #include "sfDB5.h"
-
-//===	Structures
-
-struct pdInit_args {
-	int32_t arena;
-}
+#include "mapped.h"
 
 //===	Variables
 
 extern xm_tlv	int32_t pd_arena;
 extern		void **pd_arenaLUT;
 
+//===	Defines
+
+// arena allocation block size
+#define	ABLKLEN	4096	// 4K pagesize
+
 //===	Functions
 
 // initialize an arena
-void * pd_init (void *ptr);
+void * pd_init (size_t len, uint8_t *map);
 
 // require arena specification
-xmattr_malloc void *pd_emalloc	(size_t size, int32_t pd_arena);
-xmattr_malloc void *pd_ecalloc	(size_t count, size_t size, int32_t pd_arena);
-void *pd_erealloc		(void *ptr, size_t size, int32_t pd_arena);
-void pd_efree			(void *ptr, int32_t pd_arena);
-
-// just like normal malloc() family functions
-xmattr_malloc static inline void *pd_malloc (size_t size) {
-	return pd_emalloc (size, pd_arena);
-}
-
-xmattr_malloc static inline void *pd_calloc (size_t count, size_t size) {
-	return pd_ecalloc (count, size, pd_arena);
-}
-
-void *pd_realloc (void *ptr, size_t size) {
-	return pd_erealloc (ptr, size, pd_arena);
-}
-
-void pd_free (void *ptr) {
-	return pd_efree (ptr, pd_arena);
-}
+xmattr_malloc void *pd_mallocBK	(void);
+xmattr_malloc void *pd_callocBK	(void);
+void pd_free			(void *ptr);
