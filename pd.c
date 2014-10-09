@@ -2,7 +2,7 @@
 
 xm_tlv void *arena;
 
-void * pd_init (size_t len, uint8_t *map) {
+void pd_init (size_t len, uint8_t *map) {
 	int x;
 	size_t const block = len / 256;			// arena physical size
 	size_t const size = (block / ABLKLEN) * ABLKLEN;	// arena useable size
@@ -15,7 +15,7 @@ void * pd_init (size_t len, uint8_t *map) {
 		header->bounds	= ABLKLEN;	// current bounds
 	}
 
-	return NULL;
+	return;
 }
 
 xmattr_malloc void *pd_mallocBK	(void) {

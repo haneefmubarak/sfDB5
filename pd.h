@@ -16,8 +16,7 @@
 
 //===	Variables
 
-extern xm_tlv	int32_t pd_arena;
-extern		void **pd_arenaLUT;
+extern xm_tlv	void *arena;
 
 //===	Defines
 
@@ -27,7 +26,7 @@ extern		void **pd_arenaLUT;
 //===	Functions
 
 // initialize an arena
-void * pd_init (size_t len, uint8_t *map);
+void pd_init (size_t len, uint8_t *map);
 
 // require arena specification
 xmattr_malloc void *pd_mallocBK	(void);
