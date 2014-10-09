@@ -46,9 +46,9 @@ sfDB5 has three main inspirations:
 Contributing and/or Sponsoring
 ------------------------------
 
-See [HelpOut.md](HelpOut.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-`sfDB5` is inspired by Redis and Couchbase, and is licensed under
-the MIT license.
+`sfDB5` is inspired by [Redis](http://redis.io/) and
+[Couchbase](http://www.couchbase.com/), and is licensed under the MIT license.
