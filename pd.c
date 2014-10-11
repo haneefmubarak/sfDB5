@@ -4,16 +4,14 @@ xm_tlv void *pd_arena;
 
 void pd_init (size_t len, uint8_t *map) {
 	int x;
-	size_t const block = len / 256;			// arena physical size
+	size_t const block = len;			// arena physical size
 	size_t const size = (block / ABLKLEN) * ABLKLEN;	// arena useable size
 	arenaheader *header;
 
-	for (x = 0; x < 256; x++) {
-		header = (void *) &(map[x * block]);
-		header->freelist = NULL;		// no free blocks because all are free
-		header->size	= size;		// useable size
-		header->bounds	= ABLKLEN;	// current bounds
-	}
+	header = (void *) map;
+	header->freelist = NULL;		// no free blocks because all are free
+	header->size	= size;		// useable size
+	header->bounds	= ABLKLEN;	// current bounds
 
 	return;
 }
@@ -24,12 +22,12 @@ xmattr_malloc void *pd_mallocBK	(void) {
 
 	if (xm_unlikely (header->freelist)) {	// there's a sitting free block
 		ptr = header->freelist;	// return the free block
-		void **next = ptr;
+		void **next = (void **) ptr;
 		header->freelist = *next;	// update the free list
 	} else if (xm_likely (header->bounds < header->size)) {	// no free blocks
 		ptr	= pd_arena;
-		ptr	+= header->size;
-		header->size += ABLKLEN;
+		ptr	+= header->bounds;
+		header->bounds += ABLKLEN;
 	} else {	// no more blocks
 		ptr	= NULL;
 	}

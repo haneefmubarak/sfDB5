@@ -16,8 +16,8 @@ xmattr_malloc uint8_t *drive_load (size_t len, char *path, int *fd, int *err) {
 		err[0] |= 0x02;	// not a regular or block file
 	if (xm_unlikely (access (path, R_OK | W_OK) || !access (path, X_OK)))
 		err[0] |= 0x04;	// bad permissions
-	if (xm_unlikely (statbuf.st_size < (typeof (statbuf.st_size)) len))
-		err[0] |= 0x08;	// file size is greater than given size
+	if (xm_unlikely (statbuf.st_size > (typeof (statbuf.st_size)) len))
+		err[0] |= 0x08;	// file size is lesser than given size
 	if (xm_unlikely (len % DRIVE_MULSZ))
 		err[0] |= 0x16;	// given size is not a multiple of constant
 	if (xm_unlikely (len < DRIVE_MINSZ))
@@ -60,21 +60,6 @@ void drive_unload (size_t len, uint8_t *map, int fd) {
 	return;
 }
 
-//---
-
-typedef union {
-	size_t	len;
-	uint8_t	*map;
-} initArgs;
-
-static void * tzero (void *ptr) {
-	initArgs *args = ptr;
-
-	memset (args->map, 0x00, args->len);	// zero memory
-
-	return NULL;
-}
-
 int drive_initialize (size_t len, uint8_t *map) {
 	int err = 0;
 
@@ -87,41 +72,10 @@ int drive_initialize (size_t len, uint8_t *map) {
 	if (xm_unlikely (err))
 		return err;
 
-	// zero out the image
-	int cpus = sysconf (_SC_NPROCESSORS_ONLN);	// get number of cpus
-	cpus /= 2;	// don't use all of the cpus
-	while (len % cpus)
-		cpus--;	// get a number we can divide the drive into
+	// - add magic to file
+	strcpy (map, "sfDB5v0.dev");		// add magic arena header
 
-	int chunklen = len / cpus;	// get the length of each thread's chunk
-
-	pthread_t thread[cpus];
-	initArgs args[cpus];
-	int status = 0, x;
-	for (x = 0; x < cpus; x++) {
-		args[x].len = chunklen;
-		args[x].map = &map[x * chunklen];	// assign a range for the thread to zero
-		status |= pthread_create (&thread[x], NULL, tzero, &args[x]);
-	}
-
-	if (xm_unlikely (status))	// thread creation failed somewhere
-		memset (map, 0x00, len);	// do it ourselves
-	else		// expected operation
-		for (x = 0; x < cpus; x++)
-			pthread_join (thread[x], NULL);	// wait for threads to complete execution
-
-
-	// - add arenas to global arena LUT
-	pd_arenaLUT = realloc (pd_arenaLUT, sizeof (void *) * (drive_count + 1) * 256);
-	if (!pd_arenaLUT)
-		return 0x01;	// memory allocation failure
-	// - add magic to files
-	const int arenalen	= len / 256;
-	for (x = 0; x < 256; x++) {
-		void *curmap = &map[x * arenalen];	// calculate offsetted address
-		pd_arenaLUT[x + (drive_count * 256)] = curmap;	// add to global LUT
-		strcpy (curmap, "sfDB5v0.dev");		// add magic arena header
-	}
+	// add to global drive count
 	drive_count++;
 
 	return 0;
