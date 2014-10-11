@@ -1,6 +1,6 @@
 #include "pd.h"
 
-xm_tlv void *arena;
+xm_tlv void *pd_arena;
 
 void pd_init (size_t len, uint8_t *map) {
 	int x;
@@ -19,7 +19,7 @@ void pd_init (size_t len, uint8_t *map) {
 }
 
 xmattr_malloc void *pd_mallocBK	(void) {
-	arenaheader *header = arena;
+	arenaheader *header = pd_arena;
 	uint8_t *ptr;
 
 	if (xm_unlikely (header->freelist)) {	// there's a sitting free block
@@ -27,7 +27,7 @@ xmattr_malloc void *pd_mallocBK	(void) {
 		void **next = ptr;
 		header->freelist = *next;	// update the free list
 	} else if (xm_likely (header->bounds < header->size)) {	// no free blocks
-		ptr	= arena;
+		ptr	= pd_arena;
 		ptr	+= header->size;
 		header->size += ABLKLEN;
 	} else {	// no more blocks
@@ -47,8 +47,8 @@ xmattr_malloc void *pd_callocBK	(void) {
 	return ptr;
 }
 
-void pd_free (void *ptr) {
-	arenaheader *header = arena;
+void pd_freeBK (void *ptr) {
+	arenaheader *header = pd_arena;
 
 	if (xm_likely (ptr)) {	// non-NULL ptr
 		void *next = header->freelist;	// get current top of stack

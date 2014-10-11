@@ -16,7 +16,7 @@
 
 //===	Variables
 
-extern xm_tlv	void *arena;
+extern xm_tlv	void *pd_arena;
 
 //===	Defines
 
@@ -31,4 +31,4 @@ void pd_init (size_t len, uint8_t *map);
 // require arena specification
 xmattr_malloc void *pd_mallocBK	(void);
 xmattr_malloc void *pd_callocBK	(void);
-void pd_free			(void *ptr);
+void pd_freeBK			(void *ptr);
