@@ -1,5 +1,7 @@
 #pragma once
 
+//===	Defines
+
 #define xm_min(a,b) ({	\
 		typeof (a) _a = (a);	\
 		typeof (b) _b = (b);	\

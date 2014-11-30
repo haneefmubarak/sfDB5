@@ -26,12 +26,11 @@ static inline int cmp_rdv (const void *arg1, const void* arg2) {
 #define SORT_NAME rendezvous
 #define SORT_TYPE rdv
 #define SORT_CMP(x, y) cmp_rdv (&x, &y)
-#include "./deps/sort/sort.h"
+#include "sort.h"
 
 //===	Functions
 
 static inline int *rendezvous (__uint128_t *pool, uint64_t id, int nodes) {
-
 	register int x;
 
 	// store temporary results
