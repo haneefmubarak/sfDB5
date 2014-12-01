@@ -3,6 +3,8 @@
 //===	Includes
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "xm.h"
 
@@ -17,9 +19,13 @@ typedef struct {
 
 //=== Variables
 
-extern xm_tlv kv_error;
+extern int xm_tlv kv_error;
 
 //=== Functions
+
+// startup / shutdown
+int kv_initialize	(size_t cacheSize);
+void kv_terminate	(void);
 
 // overall db ops
 kv_db_t xmattr_malloc *kv_db_new	(const uint8_t *path);
