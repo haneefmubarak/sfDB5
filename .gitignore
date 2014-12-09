@@ -26,3 +26,6 @@
 *.gch
 *.make
 Makefile
+
+# Premake output
+obj/
