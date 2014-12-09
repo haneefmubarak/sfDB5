@@ -8,9 +8,9 @@
 #include <ftw.h>
 #include <unistd.h>
 
-#include "../backend.h"
+#include <rocksdb/c.h>
 
-#include "rocksdb/c.h"
+#include "backend.h"
 
 //===	Types
 

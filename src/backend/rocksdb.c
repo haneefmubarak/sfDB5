@@ -1,7 +1,7 @@
 #include "kv_rocksdb.h"
 
 int xm_tlv kv_error = 0;
-static char xm_tlv internal__kv_error = 0;
+static char xm_tlv *internal__kv_error;
 
 kv_db_t xm_tlv *kv_db;
 
@@ -51,11 +51,11 @@ void kv_terminate (void) {
 #define	KV_OPEN_OPTION_NEW	0x01
 
 kv_db_t xmattr_malloc *kv_db_new (const uint8_t *path) {
-	return internal__kv_db_open (path, KV_OPEN_OPTION_NEW);
+	return internal__kv_open (path, KV_OPEN_OPTION_NEW);
 }
 
 kv_db_t xmattr_malloc *kv_db_open (const uint8_t *path) {
-	return internal__kv_db_open (path, KV_OPEN_OPTION_NONE);
+	return internal__kv_open (path, KV_OPEN_OPTION_NONE);
 }
 
 static kv_db_t xmattr_malloc *internal__kv_open (const uint8_t *path, uint64_t flags) {
@@ -66,7 +66,7 @@ static kv_db_t xmattr_malloc *internal__kv_open (const uint8_t *path, uint64_t f
 	if (kv_error)
 		return NULL;
 
-	kv_rocksdb *db = malloc (sizeof kv_rocksdb);
+	kv_rocksdb *db = malloc (sizeof (kv_rocksdb));
 	if (!db) {
 		kv_error = KV_ERR_MEM;
 		return NULL;
@@ -139,7 +139,7 @@ void kv_db_close (kv_db_t *vptr) {
 }
 
 void kv_batch_start (void) {
-	if (batch)
+	if (kv_batch_active)
 		rocksdb_writebatch_clear (kv_batch);
 	else
 		kv_batch = rocksdb_writebatch_create ();
@@ -171,8 +171,8 @@ int kv_set (kv_string key, kv_string value) {
 }
 
 int kv_get (kv_string key, kv_string *value) {
-	value.data = rocksdb_get (kv_db, kv_read_options, key.data,	\
-					key.len, &value.len, &internal__kv_error);
+	value->data = rocksdb_get (kv_db, kv_read_options, key.data,	\
+					key.len, &value->len, &internal__kv_error);
 
 	return 0;
 }

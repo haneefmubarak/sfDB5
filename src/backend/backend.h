@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "xm.h"
+#include "../xm.h"
 
 //===	Defines
 
