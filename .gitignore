@@ -24,3 +24,5 @@
 
 # Preprocessed files
 *.gch
+*.make
+Makefile
