@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
-#include "../rendezvous.h"
+#include "../src/rendezvous.h"
 
 #define	NODES	20
 #define	REPFAC	4
