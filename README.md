@@ -43,6 +43,60 @@ sfDB5 has three main inspirations:
    can perform as basic synchronization primitives, especially seeing as
    that sfDB5 does not support external locking.
 
+Dependencies
+------------
+
+You will need the following:
+
+ - a Linux or OSX box (after networking is implemented, only Linux will work)
+ - GNU `coreutils >= 8.9`
+ - one of the following compilers which support GNU C:
+   - `gcc >= 4.8.0` (preferable)
+   - `clang >= 3.5.0`
+ - a working copy of [`git >= 1.8.5`](http://git-scm.com/downloads)
+ - GNU `make >= 3.8`
+ - [`premake4`](http://industriousone.com/premake/download)
+ - an installed copy of [`rocksdb >= 3.7.0`](https://github.com/facebook/rocksdb/blob/master/INSTALL.md)
+
+Building
+--------
+
+Here's how you go about it; please ensure that your output looks somewhat
+similar to the example output listed below (your results may be
+slightly different, depending on various factors):
+
+```bash
+$ git clone https://github.com/haneefmubarak/sfDB5.git
+Cloning into 'sfDB5'...
+remote: Counting objects: 245, done.
+remote: Compressing objects: 100% (15/15), done.
+remote: Total 245 (delta 4), reused 0 (delta 0)
+Receiving objects: 100% (245/245), 38.35 KiB | 0 bytes/s, done.
+Resolving deltas: 100% (117/117), done.
+Checking connectivity... done.
+$ cd sfDB5/src/
+$ premake4 gmake
+Building configurations...
+Running action 'gmake'...
+Generating Makefile...
+Generating sfDB5.make...
+Generating backend.make...
+Done.
+$ make
+==== Building backend ====
+
+...
+
+Linking backend
+==== Building sfDB5 ====
+
+...
+
+Linking sfDB5
+```
+
+sfDB5 does not run as of yet.
+
 Contributing and/or Sponsoring
 ------------------------------
 
