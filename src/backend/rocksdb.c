@@ -16,7 +16,7 @@ static int kv_init = 0;
 
 static kv_db_t xmattr_malloc *internal__kv_open (const uint8_t *path, uint64_t flags);
 
-int kv_initialize (size_t cacheSize) {
+int KVInitialize (size_t cacheSize) {
 	kv_cachesize	= cacheSize;				// caches size in bytes
 	kv_cores	= sysconf (_SC_NPROCESSORS_ONLN);	// online core count
 	kv_init		= 1;	// mark as initialized
@@ -34,13 +34,13 @@ int kv_initialize (size_t cacheSize) {
 	return 0;
 }
 
-void kv_thread_cleanup (void) {
+void KVThreadCleanup (void) {
 	rocksdb_writebatch_destroy (kv_batch);
 
 	return;
 }
 
-void kv_terminate (void) {
+void KVTerminate (void) {
 	rocksdb_writeoptions_destroy (kv_write_options);
 	rocksdb_readoptions_destroy (kv_read_options);
 
@@ -50,11 +50,11 @@ void kv_terminate (void) {
 #define	KV_OPEN_OPTION_NONE	0x00
 #define	KV_OPEN_OPTION_NEW	0x01
 
-kv_db_t xmattr_malloc *kv_db_new (const uint8_t *path) {
+kv_db_t xmattr_malloc *KVDBNew (const uint8_t *path) {
 	return internal__kv_open (path, KV_OPEN_OPTION_NEW);
 }
 
-kv_db_t xmattr_malloc *kv_db_open (const uint8_t *path) {
+kv_db_t xmattr_malloc *KVDBOpen (const uint8_t *path) {
 	return internal__kv_open (path, KV_OPEN_OPTION_NONE);
 }
 
@@ -101,12 +101,12 @@ static kv_db_t xmattr_malloc *internal__kv_open (const uint8_t *path, uint64_t f
 	return vptr;
 }
 
-static internal__kv_rmrf_callback (const uint8_t *path, const struct stat *b,	\
+static int internal__kv_rmrf_callback (const char *path, const struct stat *b,	\
 					int c, struct FTW *d) {
 	return remove (path);
 }
 
-void kv_db_delete (kv_db_t *vptr) {
+void KVDBDelete (kv_db_t *vptr) {
 	kv_rocksdb *db = vptr;
 
 	// keep a copy of path without calling malloc ()
@@ -114,7 +114,7 @@ void kv_db_delete (kv_db_t *vptr) {
 	strcpy (path, db->path);
 
 	// close the db
-	kv_db_close (vptr);
+	KVDBClose (vptr);
 
 	// remove all db related files
 	// 256: pick a nice looking number
@@ -124,7 +124,7 @@ void kv_db_delete (kv_db_t *vptr) {
 	return;
 }
 
-void kv_db_close (kv_db_t *vptr) {
+void KVDBClose (kv_db_t *vptr) {
 	kv_rocksdb *db = vptr;
 
 	rocksdb_close (db->handle);
@@ -138,7 +138,7 @@ void kv_db_close (kv_db_t *vptr) {
 	return;
 }
 
-void kv_batch_start (void) {
+void KVBatchStart (void) {
 	if (kv_batch_active)
 		rocksdb_writebatch_clear (kv_batch);
 	else
@@ -148,7 +148,7 @@ void kv_batch_start (void) {
 	return;
 }
 
-void kv_batch_end (void) {
+void KVBatchEnd (void) {
 	if (!kv_batch_active)
 		kv_error = KV_ERR_NOBATCH;
 	else
@@ -159,7 +159,7 @@ void kv_batch_end (void) {
 	return;
 }
 
-int kv_set (kv_string key, kv_string value) {
+int KVSet (kv_string key, kv_string value) {
 	if (kv_batch_active)
 		rocksdb_writebatch_put (kv_batch, key.data,	\
 				key.len, value.data, value.len);
@@ -170,14 +170,14 @@ int kv_set (kv_string key, kv_string value) {
 	return 0;
 }
 
-int kv_get (kv_string key, kv_string *value) {
+int KVGet (kv_string key, kv_string *value) {
 	value->data = rocksdb_get (kv_db, kv_read_options, key.data,	\
-					key.len, &value->len, &internal__kv_error);
+					key.len, &value->lens, &internal__kv_error);
 
 	return 0;
 }
 
-int kv_del (kv_string key) {
+int KVDelete (kv_string key) {
 	if (kv_batch_active)
 		rocksdb_writebatch_delete (kv_batch, key.data, key.len);
 	else

@@ -4,10 +4,12 @@ solution "sfDB5"
 	configuration "Debug"
 		flags { "Symbols", "ExtraWarnings" }
 		buildoptions { "-pthread" }
+		buildoptions { "-Wno-pointer-sign" }
 		linkoptions { "-pthread" }
 
 	configuration "Release"
 		buildoptions { "-pthread", "-march=native", "-O2" }
+		buildoptions { "-Wno-pointer-sign" }
 		linkoptions { "-pthread" }
 
 	-- whole project

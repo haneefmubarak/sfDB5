@@ -20,7 +20,10 @@
 typedef void kv_db_t;
 
 typedef struct {
-	int64_t		len;
+	union {
+		int64_t	len;
+		size_t	lens;
+	};
 	void		*data;
 } kv_string;
 
@@ -32,27 +35,27 @@ extern kv_db_t xm_tlv *kv_db;
 //=== Functions
 
 // startup / shutdown
-int kv_initialize	(size_t cacheSize);
-void kv_thread_cleanup	(void);
-void kv_terminate	(void);
+int KVInitialize	(size_t cacheSize);
+void KVCleanup		(void);
+void KVTerminate	(void);
 
 // overall db ops
-kv_db_t xmattr_malloc *kv_db_new	(const uint8_t *path);
-kv_db_t xmattr_malloc *kv_db_open	(const uint8_t *path);
-void kv_db_delete	(kv_db_t *db);
-void kv_db_close	(kv_db_t *db);
+kv_db_t xmattr_malloc *KVDBNew	(const uint8_t *path);
+kv_db_t xmattr_malloc *KVDBOpen	(const uint8_t *path);
+void KVDBDelete	(kv_db_t *db);
+void KVDBClose	(kv_db_t *db);
 
 // current db
-static inline void kv_db_set (kv_db_t *db) {
+static inline void KVDBSet (kv_db_t *db) {
 	kv_db = db;
 	return;
 }
 
 // batching for speed
-void kv_batch_start	(void);
-void kv_batch_end	(void);
+void KVBatchStart	(void);
+void KVBatchEnd		(void);
 
 // general functions
-int kv_set	(kv_string key, kv_string value);
-int kv_get	(kv_string key, kv_string *value);
-int kv_del	(kv_string key);
+int KVSet	(kv_string key, kv_string value);
+int KVget	(kv_string key, kv_string *value);
+int KVDelete	(kv_string key);
