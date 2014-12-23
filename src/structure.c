@@ -134,3 +134,26 @@ kv_string *StructurePack (const structure *s) {
 
 	return packed;
 }
+
+int StructureAddChildren (structure *parent, const structure *children, int count) {
+	if (parent->type)
+		return 1;	// yeah lets not cause a memory issue
+
+	// realloc () may lose data
+	structure *tmp = malloc ((parent->count + count) * sizeof (structure *));
+	if (!tmp)
+		return -1;	// memory failure
+
+	// copy over the old children
+	memcpy (tmp, parent->children, parent->count * sizeof (structure));
+	free (parent->children);
+	parent->children = tmp;
+
+	// copy over the new children
+	memcpy (&parent->children[parent->count], children, count * sizeof (structure));
+
+	// resort the array to allow bsearch() to find members
+	StructureSortChildren (parent);
+
+	return 0;
+}

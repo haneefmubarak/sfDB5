@@ -68,8 +68,11 @@ static inline int cmp_structure (const void *arg1, const void *arg2) {
 //===	Functions
 
 static inline void StructureSortChildren (structure *s) {
-	return structure_tim_sort (s->children, s->count);
+	structure_tim_sort (s->children, s->count);
+	return;
 }
+
+int StructureAddChildren	(structure *parent, const structure *children, int count);
 
 kv_string *StructurePack	(const structure *s);
 structure *StructureUnpack	(const kv_string *s);
