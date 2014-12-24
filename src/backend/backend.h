@@ -24,7 +24,7 @@ typedef struct {
 		int64_t	len;
 		size_t	lens;
 	};
-	void		*data;
+	uint8_t		*data;
 } kv_string;
 
 //=== Variables

@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "backend/backend.h"
+#include "checksum.h"
 
 //===	Defines
 

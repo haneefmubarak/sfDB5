@@ -147,10 +147,12 @@ kv_string *StructurePack (const structure *s) {
 		free (packed);
 		return NULL;
 	}
-	packed->len = len;
+	packed->len = len + sizeof (checksum_t);
 
 	int pos = 0;
 	internal_serialize_pack (s, packed->data, &pos);	// Pass II: pack it together
+	checksum_t *sum = (void *) &packed->data[pos];
+	*sum = checksum (packed->data, pos);			// detect bit errors
 
 	return packed;
 }
