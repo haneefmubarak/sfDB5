@@ -2,12 +2,14 @@ solution "sfDB5"
 	configurations { "Debug", "Release" }
 
 	configuration "Debug"
+		defines { "_GNU_SOURCE", "_XOPEN_SOURCE=700" }
 		flags { "Symbols", "ExtraWarnings" }
 		buildoptions { "-pthread" }
 		buildoptions { "-Wno-pointer-sign", "-Wno-unused-function" }
 		linkoptions { "-pthread" }
 
 	configuration "Release"
+		defines { "_GNU_SOURCE", "_XOPEN_SOURCE=700" }
 		buildoptions { "-pthread", "-march=native", "-O2" }
 		buildoptions { "-Wno-pointer-sign", "-Wno-unused-function" }
 		linkoptions { "-pthread" }
