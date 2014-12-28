@@ -74,6 +74,7 @@ static inline void StructureSortChildren (structure *s) {
 }
 
 int StructureAddChildren	(structure *parent, const structure *children, int count);
+void StructureFree		(structure *s);
 
 kv_string *StructurePack	(const structure *s);
-structure *StructureUnpack	(const kv_string *s);
+structure *StructureUnpack	(const kv_string *packed);
