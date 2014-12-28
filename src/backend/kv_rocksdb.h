@@ -4,7 +4,6 @@
 
 #include <stdio.h>
 
-#define	_XOPEN_SOURCE	500
 #include <ftw.h>
 #include <unistd.h>
 

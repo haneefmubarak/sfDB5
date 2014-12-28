@@ -19,7 +19,7 @@ int StructureAddChildren (structure *parent, const structure *children, int coun
 	parent->count += count;
 
 	// resort the array to allow bsearch() to find members
-	structure_binary_sort (parent->children, parent->count);
+	structure_binary_insertion_sort (parent->children, parent->count);
 
 	return 0;
 }
@@ -31,6 +31,7 @@ static void internal_structure_free (structure s) {
 			for (x = 0; x < s.count; x++)
 				internal_structure_free (s.children[x]);
 			// fallthough to next code
+		}
 
 
 		// contains a pointer to the blob or string (or substructures if fallthrough)
@@ -192,7 +193,7 @@ kv_string *StructurePack (const structure *s) {
 	// pack it up
 	int pos = 0;
 	internal_serialize_pack (s, packed->data, &pos);	// Pass II: pack it together
-	checksum_t *sum = (void *) packed->data[packed->len - sizeof (checksum_t)];
+	checksum_t *sum = (void *) &packed->data[packed->len - sizeof (checksum_t)];
 	*sum = checksum (packed->data, packed->len - sizeof (checksum_t));	// detect bit errors
 
 	return packed;
@@ -203,24 +204,25 @@ static structure *internal_deserialize_unpack (const kv_string *packed, int *pos
 	if (*pos >= len)
 		return NULL;
 	structure *s = (void *) &packed->data[*pos];
-	structure *r = malloc (sizeof (structure);
+	structure *r = malloc (sizeof (structure));
 	if (!r)
 		return NULL;
 
 	switch (s->type) {
 		default:
-		case: STRUCTURE_TYPE_NULL: {	// this kind of structure really shouldn't be here
+		case STRUCTURE_TYPE_NULL: {	// this kind of structure really shouldn't be here
 			free (r);
 			return NULL;
 		}
 
-		case: STRUCTURE_TYPE_SUB: {
+		case STRUCTURE_TYPE_SUB: {
 			*r = *s;	// copy the data over
 			*pos += sizeof (structure);
 
 			// copy the key over
-			r->key = strndup (&packed->data[*pos],	\	// max keysize of 255 chars
+			r->key = strndup (&packed->data[*pos],	\
 						xm_min (packed->len - *pos, 255));
+						// max keysize of 255 chars
 			if (!r->key) {
 				free (r);
 				return NULL;
@@ -229,8 +231,9 @@ static structure *internal_deserialize_unpack (const kv_string *packed, int *pos
 
 			// when building up substructures, clean up if we get a bad one
 			r->count = 0;	// adding structures needs to increment this
+			int x;
 			for (x = 0; x < s->count; x++) {
-				structure *t = internal_deserialize_unpack (packed, *pos);
+				structure *t = internal_deserialize_unpack (packed, pos);
 				if (!t) {
 					StructureFree (r);
 					return NULL;
@@ -242,14 +245,15 @@ static structure *internal_deserialize_unpack (const kv_string *packed, int *pos
 		}
 
 
-		case: STRUCTURE_TYPE_BLOB:
-		case: STRUCTURE_TYPE_STRING: {
+		case STRUCTURE_TYPE_BLOB:
+		case STRUCTURE_TYPE_STRING: {
 			*r = *s;	// copy the data over
 			*pos += sizeof (structure);
 
 			// copy the key over
-			r->key = strndup (&packed->data[*pos],	\	// max keysize of 255 chars
+			r->key = strndup (&packed->data[*pos],	\
 						xm_min (packed->len - *pos, 255));
+						// max keysize of 255 chars
 			if (!r->key) {
 				free (r);
 				return NULL;
@@ -280,8 +284,9 @@ static structure *internal_deserialize_unpack (const kv_string *packed, int *pos
 			*pos += sizeof (structure);
 
 			// copy the key over
-			r->key = strndup (&packed->data[*pos],	\	// max keysize of 255 chars
+			r->key = strndup (&packed->data[*pos],	\
 						xm_min (packed->len - *pos, 255));
+						// max keysize of 255 chars
 			if (!r->key) {
 				free (r);
 				return NULL;
@@ -299,7 +304,7 @@ static structure *internal_deserialize_unpack (const kv_string *packed, int *pos
 
 structure *StructureUnpack (const kv_string *packed) {
 	// validate checksum
-	checksum_t *sum = (void *) packed->data[packed->len - sizeof (checksum_t)];
+	checksum_t *sum = (void *) &packed->data[packed->len - sizeof (checksum_t)];
 	if (*sum != checksum (packed->data, packed->len - sizeof (checksum_t)))
 		return NULL;	// checksum does not match
 
