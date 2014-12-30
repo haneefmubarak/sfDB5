@@ -105,20 +105,20 @@ typedef struct {
 } TIM_SORT_RUN_T;
 
 
-void SHELL_SORT(SORT_TYPE *dst, const size_t size);
-void BINARY_INSERTION_SORT(SORT_TYPE *dst, const size_t size);
-void HEAP_SORT(SORT_TYPE *dst, const size_t size);
-void QUICK_SORT(SORT_TYPE *dst, const size_t size);
-void MERGE_SORT(SORT_TYPE *dst, const size_t size);
-void MERGE_SORT_IN_PLACE(SORT_TYPE *dst, const size_t size);
-void SELECTION_SORT(SORT_TYPE *dst, const size_t size);
-void TIM_SORT(SORT_TYPE *dst, const size_t size);
+static void SHELL_SORT(SORT_TYPE *dst, const size_t size);
+static void BINARY_INSERTION_SORT(SORT_TYPE *dst, const size_t size);
+static void HEAP_SORT(SORT_TYPE *dst, const size_t size);
+static void QUICK_SORT(SORT_TYPE *dst, const size_t size);
+static void MERGE_SORT(SORT_TYPE *dst, const size_t size);
+static void MERGE_SORT_IN_PLACE(SORT_TYPE *dst, const size_t size);
+static void SELECTION_SORT(SORT_TYPE *dst, const size_t size);
+static void TIM_SORT(SORT_TYPE *dst, const size_t size);
 
 
 /* Shell sort implementation based on Wikipedia article
    http://en.wikipedia.org/wiki/Shell_sort
 */
-void SHELL_SORT(SORT_TYPE *dst, const size_t size) {
+static void SHELL_SORT(SORT_TYPE *dst, const size_t size) {
   /* don't bother sorting an array of size 0 */
   if (size == 0) {
     return;
@@ -221,7 +221,7 @@ static void BINARY_INSERTION_SORT_START(SORT_TYPE *dst, const size_t start, cons
 }
 
 /* Binary insertion sort */
-void BINARY_INSERTION_SORT(SORT_TYPE *dst, const size_t size) {
+static void BINARY_INSERTION_SORT(SORT_TYPE *dst, const size_t size) {
   /* don't bother sorting an array of size 0 */
   if (size == 0) {
     return;
@@ -231,7 +231,7 @@ void BINARY_INSERTION_SORT(SORT_TYPE *dst, const size_t size) {
 }
 
 /* Selection sort */
-void SELECTION_SORT(SORT_TYPE *dst, const size_t size) {
+static void SELECTION_SORT(SORT_TYPE *dst, const size_t size) {
   /* don't bother sorting an array of size 0 */
   if (size == 0) {
     return;
@@ -250,7 +250,7 @@ void SELECTION_SORT(SORT_TYPE *dst, const size_t size) {
 }
 
 /* In-place mergesort */
-void MERGE_SORT_IN_PLACE_ASWAP(SORT_TYPE * dst1, SORT_TYPE * dst2, size_t len) {
+static void MERGE_SORT_IN_PLACE_ASWAP(SORT_TYPE * dst1, SORT_TYPE * dst2, size_t len) {
   do {
     SORT_SWAP(*dst1, *dst2);
     dst1++;
@@ -258,7 +258,7 @@ void MERGE_SORT_IN_PLACE_ASWAP(SORT_TYPE * dst1, SORT_TYPE * dst2, size_t len) {
   } while (--len);
 }
 
-void MERGE_SORT_IN_PLACE_FRONTMERGE(SORT_TYPE *dst1, size_t l1, SORT_TYPE *dst2, size_t l2) {
+static void MERGE_SORT_IN_PLACE_FRONTMERGE(SORT_TYPE *dst1, size_t l1, SORT_TYPE *dst2, size_t l2) {
   SORT_TYPE *dst0 = dst2 - l1;
 
   if (SORT_CMP(dst1[l1 - 1], dst2[0]) <= 0) {
@@ -289,7 +289,7 @@ void MERGE_SORT_IN_PLACE_FRONTMERGE(SORT_TYPE *dst1, size_t l1, SORT_TYPE *dst2,
   } while (--l1);
 }
 
-size_t MERGE_SORT_IN_PLACE_BACKMERGE(SORT_TYPE * dst1, size_t l1, SORT_TYPE * dst2, size_t l2) {
+static size_t MERGE_SORT_IN_PLACE_BACKMERGE(SORT_TYPE * dst1, size_t l1, SORT_TYPE * dst2, size_t l2) {
   size_t res;
   SORT_TYPE *dst0 = dst2 + l1;
 
@@ -326,7 +326,7 @@ size_t MERGE_SORT_IN_PLACE_BACKMERGE(SORT_TYPE * dst1, size_t l1, SORT_TYPE * ds
 }
 
 /* merge dst[p0..p1) by buffer dst[p1..p1+r) */
-void MERGE_SORT_IN_PLACE_RMERGE(SORT_TYPE *dst, size_t len, size_t lp, size_t r) {
+static void MERGE_SORT_IN_PLACE_RMERGE(SORT_TYPE *dst, size_t len, size_t lp, size_t r) {
   size_t i, lq;
   int cv;
 
@@ -373,7 +373,7 @@ void MERGE_SORT_IN_PLACE_RMERGE(SORT_TYPE *dst, size_t len, size_t lp, size_t r)
 }
 
 /* In-place Merge Sort implementation. (c)2012, Andrey Astrelin, astrelin@tochka.ru */
-void MERGE_SORT_IN_PLACE(SORT_TYPE *dst, const size_t len) {
+static void MERGE_SORT_IN_PLACE(SORT_TYPE *dst, const size_t len) {
   /* don't bother sorting an array of size 0 */
   if (len == 0) {
     return;
@@ -466,7 +466,7 @@ void MERGE_SORT_IN_PLACE(SORT_TYPE *dst, const size_t len) {
 }
 
 /* Standard merge sort */
-void MERGE_SORT(SORT_TYPE *dst, const size_t size) {
+static void MERGE_SORT(SORT_TYPE *dst, const size_t size) {
   SORT_TYPE *newdst;
 
   const uint64_t middle = size / 2;
@@ -572,7 +572,7 @@ static void QUICK_SORT_RECURSIVE(SORT_TYPE *dst, const int64_t left, const int64
   QUICK_SORT_RECURSIVE(dst, new_pivot + 1, right);
 }
 
-void QUICK_SORT(SORT_TYPE *dst, const size_t size) {
+static void QUICK_SORT(SORT_TYPE *dst, const size_t size) {
   /* don't bother sorting an array of size 0 */
   if (size == 0) {
     return;
@@ -852,7 +852,7 @@ static __inline int PUSH_NEXT(SORT_TYPE *dst,
   return 1;
 }
 
-void TIM_SORT(SORT_TYPE *dst, const size_t size) {
+static void TIM_SORT(SORT_TYPE *dst, const size_t size) {
   /* don't bother sorting an array of size 0 */
   if (size == 0) {
     return;
@@ -930,7 +930,7 @@ static __inline void HEAPIFY(SORT_TYPE *dst, const size_t size) {
   }
 }
 
-void HEAP_SORT(SORT_TYPE *dst, const size_t size) {
+static void HEAP_SORT(SORT_TYPE *dst, const size_t size) {
   /* don't bother sorting an array of size 0 */
   if (size == 0) {
     return;
