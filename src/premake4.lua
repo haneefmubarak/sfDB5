@@ -2,7 +2,7 @@ solution "sfDB5"
 	configurations { "Debug", "Release" }
 
 	configuration "Debug"
-		defines { "_GNU_SOURCE", "_XOPEN_SOURCE=700" }
+		defines { "_GNU_SOURCE" }
 		flags { "Symbols", "ExtraWarnings" }
 		buildoptions { "-pthread" }
 		buildoptions { "-Wno-pointer-sign", "-Wno-unused-function",
@@ -10,7 +10,7 @@ solution "sfDB5"
 		linkoptions { "-pthread" }
 
 	configuration "Release"
-		defines { "_GNU_SOURCE", "_XOPEN_SOURCE=700" }
+		defines { "_GNU_SOURCE" }
 		buildoptions { "-pthread", "-march=native", "-O2" }
 		buildoptions { "-Wno-pointer-sign", "-Wno-unused-function",
 				"-Wno-unused-but-set-variable" }
