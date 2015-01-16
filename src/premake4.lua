@@ -5,15 +5,21 @@ solution "sfDB5"
 		defines { "_GNU_SOURCE" }
 		flags { "Symbols", "ExtraWarnings" }
 		buildoptions { "-pthread" }
-		buildoptions { "-Wno-pointer-sign", "-Wno-unused-function",
-				"-Wno-unused-but-set-variable" }
+		buildoptions {	"-Wno-pointer-sign",
+				"-Wno-unused-function",
+				"-Wno-unused-but-set-variable",
+				"-Wno-unknown-warning",
+				"-Wno-unknown-warning-option" }
 		linkoptions { "-pthread" }
 
 	configuration "Release"
 		defines { "_GNU_SOURCE" }
 		buildoptions { "-pthread", "-march=native", "-O2" }
-		buildoptions { "-Wno-pointer-sign", "-Wno-unused-function",
-				"-Wno-unused-but-set-variable" }
+		buildoptions {	"-Wno-pointer-sign",
+				"-Wno-unused-function",
+				"-Wno-unused-but-set-variable",
+				"-Wno-unknown-warning",
+				"-Wno-unknown-warning-option" }
 		linkoptions { "-pthread" }
 
 	-- whole project
@@ -22,7 +28,7 @@ solution "sfDB5"
 		language "C"
 		files { "*.c", "*.h" }
 		includedirs { "../deps/sort" }
-		links { "backend" }
+		links { "backend", "pcre" }
 		
 
 	-- choose kv-backend

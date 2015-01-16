@@ -26,4 +26,5 @@ typedef struct query_struct_token {
 
 //===	Functions
 
-query_token *QueryParse (const uint8_t *query, const uint8_t **vars, int varcount);
+query_token *QueryParse	(const uint8_t *query, const uint8_t **vars, int varcount);
+int QueryValidate	(const uint8_t *query);
