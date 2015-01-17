@@ -15,8 +15,8 @@
 //===	Variables
 
 extern int	regex_init;
-extern pcre	*regex_query_full;
-extern pcre	*regex_query_structure;
+extern pcre	*regex_query_full, *regex_query_structure;
+extern pcre_extra	*regex_study_query_full, *regex_study_query_structure;
 
 //===	Functions
 

@@ -91,3 +91,19 @@ static uint8_t *__internal_query_subparse (const uint8_t *query, int *pos, int *
 	*op	= oper;
 	return r;
 }
+
+int QueryValidate (const uint8_t *query) {
+	int len = strnlen (query, 1024);
+	if (len >= 1024)	// too long
+		return 0;
+
+	int ovector[REGEX_OVECSIZE];
+	int r = pcre_exec (regex_query_full, regex_study_query_full, query, len,
+				0,
+				PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART,
+				ovector,
+				REGEX_OVECSIZE);
+	r = (r <= 0) ? 0 : r;	// r is count of matches
+
+	return r;
+}

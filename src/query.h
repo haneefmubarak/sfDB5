@@ -7,6 +7,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include "regex.h"
+
 //===	Defines
 
 #define	QUERY_OPER_ERROR	0x00	// BOOM! - you should never see this
