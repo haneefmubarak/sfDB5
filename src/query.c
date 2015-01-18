@@ -2,17 +2,17 @@
 
 static uint8_t *__internal_query_subparse (const uint8_t *query, int *pos, int *op, int len);
 
-query_token *QueryParse (const uint8_t *query,  const uint8_t **vars, int varcount) {
-	int len = strlen (query);
-	if (len < varcount)
-		return NULL;	// bad string
+query_token *QueryParse (const uint8_t *query, int len) {
+	len = strnlen (query, xm_min(len, 1024));
+	if (!QueryValidate (query, len))
+		return NULL;
 
-	query_token *tokens = calloc (varcount, sizeof (query_token));
+	query_token *tokens = calloc (128, sizeof (query_token));	// max tokens
 	if (!tokens)
 		return NULL;	// insufficient memory
 
 	int x, pos = 0, oper = 0;
-	for (x = 0; oper != QUERY_OPER_END; x++) {	// traverse the string
+	for (x = 0; (oper != QUERY_OPER_END) && (x < 128); x++) {	// traverse the string
 		oper = 0;
 		tokens[x].token = __internal_query_subparse (query, &pos, &oper, len);
 
