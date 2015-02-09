@@ -1,140 +1,288 @@
 #include "query.h"
 
-static uint8_t *__internal_query_subparse (const uint8_t *query, int *pos, int *op, int len);
+void QueryTokenFree (query_token *head) {
+	while (head != NULL) {
+		switch (head->oper) {
+			case QUERY_OPER_SUB:
+			case QUERY_OPER_DEREFERENCE:
+			case QUERY_OPER_CAST:
+				free (head->token);
+			// fallthrough
 
-query_token *QueryParse (const uint8_t *query, int len) {
-	len = strnlen (query, xm_min(len, 1024));
-	if (!QueryValidate (query, len))
-		return NULL;
-
-	query_token *tokens = calloc (128, sizeof (query_token));	// max tokens
-	if (!tokens)
-		return NULL;	// insufficient memory
-
-	int x, pos = 0, oper = 0;
-	for (x = 0; (oper != QUERY_OPER_END) && (x < 128); x++) {	// traverse the string
-		oper = 0;
-		tokens[x].token = __internal_query_subparse (query, &pos, &oper, len);
-
-		if	(!tokens[x].token	|| \
-			oper == QUERY_OPER_ERROR	|| \
-			oper == QUERY_OPER_INVALID) {
-			// error in subparse; cleanup and return
-
-			int y;
-			for (y = 0; y <= x; y++)
-				free (tokens[x].token);
-			free (tokens);
-			return NULL;
-		}
-
-		tokens[x].oper = oper;
-	}
-
-	return tokens;
-}
-
-static uint8_t *__internal_query_subparse (const uint8_t *query, int *pos, int *op, int len) {
-	int x;
-	int oper = 0;
-	for (x = *pos; !oper; x++) {	// string traversal
-		switch (query[x]) {
-			case 128 ... 255: {	// invalid ASCII chars
-				oper = QUERY_OPER_INVALID;
-				break;
-			}
-
-			case '.': {
-				oper = QUERY_OPER_SUB;
-				break;
-			}
-
-			case '-': {
-				if ((x + 1) < len)	// ensure we don't SEGFAULT
-					if (query[x + 1] == '>')
-						oper = QUERY_OPER_DEREFERENCE, x++;
-				break;
-			}
-
-			case ':': {
-				oper = QUERY_OPER_CAST;
-				break;
-			}
-
-			case '[': {
-				if ((x + 19) < len)	// prevent SEGFAULT
-					if (QueryArrayValidate (&query[x], 20))
-						oper = QUERY_OPER_ARRAY, x+= 19;
-					else
-						oper = QUERY_OPER_INVALID;
-			}
-
+			case QUERY_OPER_ARRAY:
 			default: {
-				break;
+				void *p = head;
+				head = head->next;
+				free (p);
 			}
 		}
-
-		if ((x + 1) > len)
-			oper = QUERY_OPER_END, x++;	// 'x++' allows case fallthrough below
 	}
 
-	uint8_t *r = NULL;
-	switch (oper) {
-		case QUERY_OPER_INVALID: {
-			return NULL;
+	return;
+}
+
+static inline int internal__query_isw (int c) {
+	if (isalnum (c) || c == '_')
+		return 1;
+	return 0;
+}
+
+#define ALNUM()	{ \
+	if (isalnum (query[p])) p++, w++; \
+	else return NULL; \
+}
+#define WORDH(wordend)	{ \
+	if (internal__query_isw (query[p])) p++, w++; \
+	else if (query[p] == '.' && isalnum (query[p - 1])) goto wordend; \
+	else goto cleanup; \
+}
+#define WORDS(wordend)	{ \
+	if (internal__query_isw (query[p])) p++, w++; \
+	else if ((query[p] == '.' || query[p] == ':' || query[p] == '[' || query[p] == '-' || query[p] == 0)&& isalnum (query[p - 1])) \
+		goto wordend; \
+	else goto cleanup; \
+}
+#define WORDC(wordend)	{ \
+	if (internal__query_isw (query[p])) p++, w++; \
+	else if ((query[p] == '.' || query[p] == '[' || query[p] == '-' || query[p] == 0)&& isalnum (query[p - 1])) \
+		goto wordend; \
+	else goto cleanup; \
+}
+
+query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminator
+	int len = strlen (query);
+	int p = 0, w, il, ol;
+	query_token *head = NULL, *tail = NULL, *last = NULL;
+
+	w = 0;
+	ALNUM ();
+	while (w < 255)
+		WORDH (w0);
+	return NULL;
+
+	w0:
+	head = malloc (sizeof (query_token));
+	if (!head)
+		return NULL;
+	head->next = NULL;
+	head->oper = QUERY_OPER_SUB;
+	head->token = strndup (&query[p - w], w - 1);
+	last = head;
+	if (!head->token) {
+		free (head);
+		return NULL;
+	}
+	p++;
+
+	il = 0;
+	while (il < 16) {
+		w = 0;
+		ALNUM ();
+		while (w < 255)
+			WORDS (wisx);
+		goto cleanup;
+
+		wisx:
+		tail = malloc (sizeof (query_token));
+		if (!tail)
+			goto cleanup;
+		tail->next = NULL;
+		tail->oper = QUERY_OPER_SUB;
+		tail->token = strndup (&query[p - w], w - 1);
+		if (!tail->token) {
+			free (tail);
+			goto cleanup;
+		}
+		last->next = tail;
+		last = tail;
+		tail = NULL;
+
+		if (query[p] == ':') {
+			p++;
+			w = 0;
+			ALNUM ();
+			while (w < 255)
+				WORDC (wicx);
+			goto cleanup;
+
+			wicx:
+			tail = malloc (sizeof (query_token));
+			if (!tail)
+				goto cleanup;
+			tail->next = NULL;
+			tail->oper = QUERY_OPER_CAST;
+			tail->token = strndup (&query[p - w], w - 1);
+			if (!tail->token) {
+				free (tail);
+				goto cleanup;
+			}
+			last->next = tail;
+			last = tail;
+			tail = NULL;
 		}
 
-		case QUERY_OPER_SUB:	// copying of string is identical for these ops
-		case QUERY_OPER_CAST:
-		case QUERY_OPER_END:
-		case QUERY_OPER_ARRAY: {
-			r = strndup (&query[*pos], x - *pos);	// handle cleanup on return
-			break;
+		if (query[p] == '[') {
+			if (p + 18 > len)
+				goto cleanup;
+			if (query[p + 1] != '0' || query[p + 2] != 'x' || query[p + 18] != ']')
+				goto cleanup;
+			p += 3;
+
+			tail = malloc (sizeof (query_token));
+			if (!tail)
+				goto cleanup;
+			tail->next = NULL;
+			tail->oper = QUERY_OPER_ARRAY;
+			tail->index = HexToInt (&query[p]);
+
+			p += 16;
 		}
 
+		if (query[p] == '-') {
+			if (query[p + 1] != '>')
+				goto cleanup;
 
-		case QUERY_OPER_DEREFERENCE: {
-			r = strndup (&query[*pos], x - (*pos + 1));	// handle dual char oper
-			break;
+			p++;
+			w = 0;
+			ALNUM ();
+			while (w < 255)
+				WORDH (widx);
+			goto cleanup;
+
+			widx:
+			tail = malloc (sizeof (query_token));
+			if (!tail)
+				goto cleanup;
+			tail->next = NULL;
+			tail->oper = QUERY_OPER_DEREFERENCE;
+			tail->token = strndup (&query[p - w], w - 1);
+			if (!tail->token) {
+				free (tail);
+				goto cleanup;
+			}
+			last->next = tail;
+			last = tail;
+			tail = NULL;
+
+			goto derefstart;
 		}
 
-		default: {
-			// there shouldn't be a way to get here
-			assert (!"__internal_query_subparse (): case default should be unreachable");
+		if (query[p] == 0)
+			return head;
+
+		il++;
+		p++;
+	}
+	QueryTokenFree (head);
+	return NULL;
+
+	derefstart:
+	ol = 0;
+	deref:
+	while (ol < 16) {
+		il = 0;
+		while (il < 16) {
+			w = 0;
+			ALNUM ();
+			while (w < 255)
+				WORDS (wosx);
+			goto cleanup;
+
+			wosx:
+			tail = malloc (sizeof (query_token));
+			if (!tail)
+				goto cleanup;
+			tail->next = NULL;
+			tail->oper = QUERY_OPER_SUB;
+			tail->token = strndup (&query[p - w], w - 1);
+			if (!tail->token) {
+				free (tail);
+				goto cleanup;
+			}
+			last->next = tail;
+			last = tail;
+			tail = NULL;
+
+			if (query[p] == ':') {
+				p++;
+				w = 0;
+				ALNUM ();
+				while (w < 255)
+					WORDC (wocx);
+				goto cleanup;
+
+				wocx:
+				tail = malloc (sizeof (query_token));
+				if (!tail)
+					goto cleanup;
+				tail->next = NULL;
+				tail->oper = QUERY_OPER_CAST;
+				tail->token = strndup (&query[p - w], w - 1);
+				if (!tail->token) {
+					free (tail);
+					goto cleanup;
+				}
+				last->next = tail;
+				last = tail;
+				tail = NULL;
+			}
+
+			if (query[p] == '[') {
+				if (p + 18 > len)
+					goto cleanup;
+				if (query[p + 1] != '0' || query[p + 2] != 'x' || query[p + 18] != ']')
+					goto cleanup;
+				p += 3;
+
+				tail = malloc (sizeof (query_token));
+				if (!tail)
+					goto cleanup;
+				tail->next = NULL;
+				tail->oper = QUERY_OPER_ARRAY;
+				tail->index = HexToInt (&query[p]);
+
+				p += 16;
+			}
+
+			if (query[p] == '-') {
+				if (query[p + 1] != '>')
+					goto cleanup;
+
+				p++;
+				w = 0;
+				ALNUM ();
+				while (w < 255)
+					WORDH (wodx);
+				goto cleanup;
+
+				wodx:
+				tail = malloc (sizeof (query_token));
+				if (!tail)
+					goto cleanup;
+				tail->next = NULL;
+				tail->oper = QUERY_OPER_DEREFERENCE;
+				tail->token = strndup (&query[p - w], w - 1);
+				if (!tail->token) {
+					free (tail);
+					goto cleanup;
+				}
+				last->next = tail;
+				last = tail;
+				tail = NULL;
+
+				goto deref;
+			}
+
+			if (query[p] == 0)
+				return head;
+
+			il++;
+			p++;
 		}
+		goto cleanup;
 	}
 
-	// set vars and return
-	*pos	= x;
-	*op	= oper;
-	return r;
-}
-
-static int internal__query_validate (const uint8_t *query, int len, pcre *p, pcre_extra *s) {
-	len = strnlen (query, xm_min(len, 1024));
-	if (len >= 1024)	// too long
-		return 0;
-
-	int ovector[REGEX_OVECSIZE];
-	int r = pcre_exec (p, s, query, len, 0,
-				PCRE_NOTEMPTY | PCRE_NOTEMPTY_ATSTART,
-				ovector, REGEX_OVECSIZE);
-	r = (r <= 0) ? 0 : r;	// r is count of matches
-
-	return r;
-}
-
-int QueryValidate (const uint8_t *query, int len) {
-	return internal__query_validate (query, len, regex_query_full,
-			regex_study_query_full);
-}
-
-int QueryStructureValidate (const uint8_t *query, int len) {
-	return internal__query_validate (query, len, regex_query_structure,
-			regex_study_query_structure);
-}
-
-int QueryArrayValidate (const uint8_t *query, int len) {
-	return internal__query_validate (query, len, regex_query_array,
-			regex_study_query_array);
+	cleanup:
+	QueryTokenFree (head);
+	return NULL;
 }
