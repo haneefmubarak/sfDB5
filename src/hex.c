@@ -55,11 +55,11 @@ int64_t HexToInt (const uint8_t c[17]) {
 
 	int x;
 	for (x = 0; x < 16; x += 2) {
-		// we are getting a hex written in MSB, ie backwards
-		i ^= internal_hex_to_nibble (c[15 - x]);
+		// we are getting a hex written in LSB, ie forwards
 		i <<= 4;
-		i ^= internal_hex_to_nibble (c[15 - (x + 1)]);
+		i ^= internal_hex_to_nibble (c[x]);
 		i <<= 4;
+		i ^= internal_hex_to_nibble (c[x + 1]);
 	}
 
 	return i;

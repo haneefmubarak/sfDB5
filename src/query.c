@@ -48,6 +48,12 @@ static inline int internal__query_isw (int c) {
 		goto wordend; \
 	else goto cleanup; \
 }
+#define WORDD(wordend)	{ \
+	if (internal__query_isw (query[p])) p++, w++; \
+	else if ((query[p] == '.' || query[p] == 0) && isalnum (query[p - 1])) goto wordend; \
+	else goto cleanup; \
+}
+
 
 query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminator
 	int len = strlen (query);
@@ -66,7 +72,7 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 		return NULL;
 	head->next = NULL;
 	head->oper = QUERY_OPER_SUB;
-	head->token = strndup (&query[p - w], w - 1);
+	head->token = strndup (&query[p - w], w);
 	last = head;
 	if (!head->token) {
 		free (head);
@@ -88,7 +94,7 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 			goto cleanup;
 		tail->next = NULL;
 		tail->oper = QUERY_OPER_SUB;
-		tail->token = strndup (&query[p - w], w - 1);
+		tail->token = strndup (&query[p - w], w);
 		if (!tail->token) {
 			free (tail);
 			goto cleanup;
@@ -111,7 +117,7 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 				goto cleanup;
 			tail->next = NULL;
 			tail->oper = QUERY_OPER_CAST;
-			tail->token = strndup (&query[p - w], w - 1);
+			tail->token = strndup (&query[p - w], w);
 			if (!tail->token) {
 				free (tail);
 				goto cleanup;
@@ -122,9 +128,9 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 		}
 
 		if (query[p] == '[') {
-			if (p + 18 > len)
+			if (p + 19 > len)
 				goto cleanup;
-			if (query[p + 1] != '0' || query[p + 2] != 'x' || query[p + 18] != ']')
+			if (query[p + 1] != '0' || query[p + 2] != 'x' || query[p + 19] != ']')
 				goto cleanup;
 			p += 3;
 
@@ -135,18 +141,22 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 			tail->oper = QUERY_OPER_ARRAY;
 			tail->index = HexToInt (&query[p]);
 
-			p += 16;
+			last->next = tail;
+			last = tail;
+			tail = NULL;
+
+			p += 17;
 		}
 
 		if (query[p] == '-') {
 			if (query[p + 1] != '>')
 				goto cleanup;
 
-			p++;
+			p += 2;
 			w = 0;
 			ALNUM ();
 			while (w < 255)
-				WORDH (widx);
+				WORDD (widx);
 			goto cleanup;
 
 			widx:
@@ -155,7 +165,7 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 				goto cleanup;
 			tail->next = NULL;
 			tail->oper = QUERY_OPER_DEREFERENCE;
-			tail->token = strndup (&query[p - w], w - 1);
+			tail->token = strndup (&query[p - w], w);
 			if (!tail->token) {
 				free (tail);
 				goto cleanup;
@@ -164,6 +174,7 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 			last = tail;
 			tail = NULL;
 
+			p++;
 			goto derefstart;
 		}
 
@@ -194,7 +205,7 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 				goto cleanup;
 			tail->next = NULL;
 			tail->oper = QUERY_OPER_SUB;
-			tail->token = strndup (&query[p - w], w - 1);
+			tail->token = strndup (&query[p - w], w);
 			if (!tail->token) {
 				free (tail);
 				goto cleanup;
@@ -217,7 +228,7 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 					goto cleanup;
 				tail->next = NULL;
 				tail->oper = QUERY_OPER_CAST;
-				tail->token = strndup (&query[p - w], w - 1);
+				tail->token = strndup (&query[p - w], w);
 				if (!tail->token) {
 					free (tail);
 					goto cleanup;
@@ -241,18 +252,22 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 				tail->oper = QUERY_OPER_ARRAY;
 				tail->index = HexToInt (&query[p]);
 
-				p += 16;
+				last->next = tail;
+				last = tail;
+				tail = NULL;
+
+				p += 17;
 			}
 
 			if (query[p] == '-') {
 				if (query[p + 1] != '>')
 					goto cleanup;
 
-				p++;
+				p += 2;
 				w = 0;
 				ALNUM ();
 				while (w < 255)
-					WORDH (wodx);
+					WORDD (wodx);
 				goto cleanup;
 
 				wodx:
@@ -270,6 +285,7 @@ query_token *QueryParse (const uint8_t *query) {	// NULL terminator is terminato
 				last = tail;
 				tail = NULL;
 
+				p++;
 				goto deref;
 			}
 

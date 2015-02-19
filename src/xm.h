@@ -23,6 +23,7 @@
 		size_t _l = strnlen (_s, l);	\
 		uint8_t *_r = alloca (_l + 1);	\
 		strncpy (_r, _s, _l);	\
+		_r[_l + 1] = 0;	\
 		_r;	\
 	})
 
