@@ -3,6 +3,8 @@
 //===	Includes
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <alloca.h>
 
 #include <ftw.h>
 #include <unistd.h>

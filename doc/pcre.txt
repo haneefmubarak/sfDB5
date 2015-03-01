@@ -1,0 +1,30 @@
+List of Useful PCRE Regexes:
+
+ - Validate Array Notation:
+	[a-zA-Z0-9](\w|\-){2,253}[a-zA-Z0-9]\[0x(\d|[A-F]){16}\]
+ 
+ 	alphanumeric substring between 4 and 255 characters, with
+ 	'-' and '_' allowed in all positions except first and last
+ 
+ 	starting bracket '['
+
+	substring '0x'
+
+	capitalized hex substring of exactly 16 characters (64 bits)
+
+	ending bracket ']'
+
+ - Validate Single Structure Notation
+ 	[a-zA-Z0-9](\w|\-){2,253}[a-zA-Z0-9]\.([a-zA-Z0-9](\w|\-){2,253}	\
+ 	[a-zA-Z0-9](\:[a-zA-Z0-9](\w|\-){2,253}[a-zA-Z0-9])?			\
+ 	(\[0x(\d|[A-F]){16}\])?){1,15}
+
+	just use jex.im lol
+
+ - Validate whole query string (XD)
+	[a-zA-Z0-9](\w|\-){2,253}[a-zA-Z0-9]\.([a-zA-Z0-9](\w|\-){2,253}	\
+	[a-zA-Z0-9](\:[a-zA-Z0-9](\w|\-){2,253}[a-zA-Z0-9])?			\
+	(\[0x(\d|[A-F]){16}\])?){1,15}						\
+	(\-\>[a-zA-Z0-9](\w|\-){2,253}[a-zA-Z0-9]\.([a-zA-Z0-9](\w|\-){2,253}	\
+	[a-zA-Z0-9](\:[a-zA-Z0-9](\w|\-){2,253}					\
+	[a-zA-Z0-9])?(\[0x(\d|[A-F]){16}\])?){1,15}){0,15}
