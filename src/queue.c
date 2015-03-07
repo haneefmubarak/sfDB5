@@ -52,7 +52,7 @@ void QueueFree (queue *q) {
 void *QueueRead (queue *q) {
 	pthread_rwlock_rdlock (&q->rwlock);
 
-	int64_t item = __sync_fetch_and_sub (&q->rq.count);
+	int64_t item = __sync_fetch_and_sub (&q->rq.count, 1);
 	if (item < 0) {	// subqueue is empty
 		pthread_rwlock_unlock (&q->rwlock);
 		return NULL;
@@ -72,8 +72,8 @@ static void internal__queue_service (queue *q) {
 	{
 		void **p = q->rq.items;
 
-		q->rq.items = q.wq.items;
-		q->rq.count = q.wq.count;
+		q->rq.items = q->wq.items;
+		q->rq.count = q->wq.count;
 
 		q->wq.items = p;
 		q->wq.count = 0;
@@ -108,6 +108,6 @@ void QueueMultiWrite (queue *q, void **p, int n) {
 
 void QueueService (queue *q) {
 	pthread_mutex_lock (&q->mutex);
-	internal_queue_service (q);
+	internal__queue_service (q);
 	pthread_mutex_unlock (&q->mutex);
 }
