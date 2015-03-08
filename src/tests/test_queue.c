@@ -3,7 +3,7 @@
 
 const int subqueue_size = 8;
 
-volatile int done = 0;
+volatile int done = 0, rcvd = 0;
 
 void *produce (void *p) {
 	queue *q = p;
@@ -29,15 +29,14 @@ void *produce (void *p) {
 void *consume (void *p) {
 	queue *q = p;
 
-	int x = 0;
-	while (x < (8 * subqueue_size)) {
+	while (rcvd < (8 * subqueue_size)) {
 		char *message = QueueRead (q);
 		if (!message)
 			continue;
 
 		puts (message);
 		free (message);
-		x++;
+		__sync_add_and_fetch (&rcvd, 1);
 	}
 
 
@@ -50,15 +49,13 @@ void test (void) {
 	assert (q);
 
 	pthread_t producer;
-//	pthread_t consumers[2];
+	pthread_t consumers[2];
 	assert (!pthread_create (&producer, NULL, produce, q));
-//	int x;
-//	for (x = 0; x < 2; x++) {
-//		assert (!pthread_create (&consumers[x], NULL, consume, q));
-//		assert (!pthread_detach (consumers[x]));
-//	}
-
-	consume (q);
+	int x;
+	for (x = 0; x < 2; x++) {
+		assert (!pthread_create (&consumers[x], NULL, consume, q));
+		assert (!pthread_detach (consumers[x]));
+	}
 
 	assert (!pthread_join (producer, NULL));
 	QueueFree (q);
