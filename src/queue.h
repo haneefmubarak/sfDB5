@@ -4,9 +4,14 @@
 //	============== WARNING =============
 //	====================================
 //
-//	This queue does not preserve ordering
-//	below `maxlen, the maximum length of
-//	the subqueue.
+//	This queue is not strongly ordered.
+//	In other words, while the general
+//	order is preserved to an extent in
+//	the long run (ie: nothing should go
+//	unread for extended periods of
+//	time), in the short run, contents
+//	may end up partially reordered
+//	(usually reversed).
 
 //===	Includes
 
@@ -40,9 +45,5 @@ queue xmattr_malloc *QueueCreate	(int maxlen);
 void QueueFree				(queue *q);
 
 void *QueueRead		(queue *q);	// will return NULL if subqueue is empty
-void QueueMultiWrite	(queue *q, void **p, int n); // will block if subqueue is full
+void QueueWrite		(queue *q, void *p);	// will block if subqueue is full
 void QueueService	(queue *q);
-
-void QueueWrite	(queue *q, void *p) {
-	return QueueMultiWrite (q, &p, 1);
-}

@@ -19,16 +19,18 @@ queue xmattr_malloc *QueueCreate (int maxlen) {
 	}
 
 	// initialize pthread locks
-	if (!pthread_rwlock_init (&q->rwlock, NULL)) {
+	if (pthread_rwlock_init (&q->rwlock, NULL)) {
 		free (q->wq.items);
 		free (q->rq.items);
 		free (q);
+		return NULL;
 	}
-	if (!pthread_mutex_init (&q->mutex, NULL)) {
+	if (pthread_mutex_init (&q->mutex, NULL)) {
 		pthread_rwlock_destroy (&q->rwlock);
 		free (q->wq.items);
 		free (q->rq.items);
 		free (q);
+		return NULL;
 	}
 
 	// initialize remaining values
@@ -53,13 +55,13 @@ void *QueueRead (queue *q) {
 	pthread_rwlock_rdlock (&q->rwlock);
 
 	int64_t item = __sync_fetch_and_sub (&q->rq.count, 1);
-	if (item < 0) {	// subqueue is empty
+	if (item <= 0) {	// subqueue is empty
 		pthread_rwlock_unlock (&q->rwlock);
 		return NULL;
 	}
 
 	// fetch pointer from queue
-	void *p = q->rq.items[item];
+	void *p = q->rq.items[item - 1];	// offset
 	pthread_rwlock_unlock (&q->rwlock);
 
 	return p;
@@ -84,23 +86,20 @@ static void internal__queue_service (queue *q) {
 	return;
 }
 
-void QueueMultiWrite (queue *q, void **p, int n) {
+void QueueWrite (queue *q, void *p) {
 	pthread_mutex_lock (&q->mutex);
 
-	int x;
-	for (x = 0; x < n; x++) {
-		// check for empty read queue or full write queue
-		do {
-			if (q->rq.count < 0)	// service empty queue
-				internal__queue_service (q);
-			else if (q->wq.count == q->maxlen)	// prevent waiting CPU starvation
-				usleep (1000);
-		} while (q->wq.count == q->maxlen);
+	// check for empty read queue or full write queue
+	do {
+		if (q->rq.count < 0)	// service empty queue
+			internal__queue_service (q);
+		else if (q->wq.count == q->maxlen)	// prevent waiting CPU starvation
+			usleep (1000);
+	} while (q->wq.count == q->maxlen);
 
-		// add item
-		q->wq.items[q->wq.count] = p[x];
-		q->wq.count++;
-	}
+	// add item
+	q->wq.items[q->wq.count] = p;
+	q->wq.count++;
 
 	pthread_mutex_unlock (&q->mutex);
 	return;
@@ -108,6 +107,10 @@ void QueueMultiWrite (queue *q, void **p, int n) {
 
 void QueueService (queue *q) {
 	pthread_mutex_lock (&q->mutex);
-	internal__queue_service (q);
+
+	if (q->rq.count < 0)
+		internal__queue_service (q);
+
 	pthread_mutex_unlock (&q->mutex);
+	return;
 }
