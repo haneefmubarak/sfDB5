@@ -221,7 +221,7 @@ kv_string StructurePack (const structure *s) {
 	//		quad[count] {
 	//				u8	type;
 	//				str	key;	// NULL terminated
-	//				u16	len;	// data length (max 16M-1)
+	//				u16	len;	// data length
 	//				type	data;
 	//		}
 	//	}
@@ -230,7 +230,7 @@ kv_string StructurePack (const structure *s) {
 
 	struct i64_pair t = internal__structure_traverse_prepare (s, 0, 0);
 	t.len += 4 + 2;	// u32 len + u16 count
-	if (t.count > ((1 << 16) - 1) || t.len > ((1 << 24) - 1))
+	if (t.count > ((1 << 16) - 1) || t.len > ((1 << 24) - 1))	// 16M-1 max size
 		return empty;
 	const uint32_t len	= t.len;
 	const uint16_t count	= t.count;
@@ -252,4 +252,161 @@ kv_string StructurePack (const structure *s) {
 	internal__structure_traverse_pack (s, &offset, packed, &nullterm, 0);
 
 	return packed;
+}
+
+structure *StructureUnpack (const kv_string packed) {
+	uint32_t offset = 0;
+
+	// length
+	uint32_t l;
+	memcpy (&l, &packed.data[offset], sizeof (l));
+	offset += sizeof (l);
+	const uint32_t len = xm_min (l, packed.len);
+
+	// field count
+	uint16_t c;
+	memcpy (&c, &packed.data[offset], sizeof (c));
+	offset += sizeof (c);
+	const uint16_t count = c;
+
+	// sanity check
+	if (count > ((1 << 16) - 1) || len > ((1 << 24) - 1))	// 16M-1 max size
+		return NULL;
+	else if (len < count || len < 18)	// minimum packed size
+		return NULL;
+
+	int x;
+	structure *root = malloc (sizeof (structure));
+	if (!root)
+		return NULL;
+	for (x = 0; x < count; x++) {
+		if ((len - offset) < 18)
+			break;
+
+		// type
+		uint8_t type;
+		memcpy (&type, &packed.data[offset], sizeof (type));
+		offset += sizeof (type);
+
+		// key
+		int klen = strnlen (&packed.data[offset], len - offset);
+		query_token *head = QuerySafeParse (&packed.data[offset], klen);
+		if (!head)
+			continue;
+		else if (x == 0) {	// first run
+			root->key = strdup (head->token);
+			if (!root->key)
+				return NULL;
+
+			root->children = NULL;
+			root->count = 0;
+			root->type = STRUCTURE_TYPE_SUB;
+		} else if (strcmp (root->key, head->token)) {	// head keys differ
+			QueryTokenFree (head);
+			continue;
+		}
+		offset += klen;
+
+		structure *s = root;
+		query_token *node = head;
+		int error = 0;
+		if (node->next != 0) {	// handle KV as opposed to KSV
+			if (s->type != STRUCTURE_TYPE_SUB) {
+				QueryTokenFree (head);
+				continue;	// through the outermost loop
+			}
+
+			while (node->next) {
+				node = node->next;
+
+				int match = 0;
+				for (x = 0; x < s->count; x++) {
+					match = !strcmp (node->token, s->children[x].key);
+					if (match)
+						break;	// out of the local loop
+				}
+
+				if (!match) {
+					structure *t = alloca (sizeof (structure));
+
+					t->key = strdup (node->token);
+					if (!t->key) {
+						error = 1;
+						break;	// out of the entire thing
+					}
+
+					t->type = STRUCTURE_TYPE_SUB;
+					t->children = NULL;
+					t->count = 0;
+
+					error = StructureAddChildren (s, t, 1);
+					if (error)
+						break;	// out of the entire thing
+
+					continue;	// find our sorted position
+				}
+
+				s = &s->children[x];
+			}
+		}
+
+		if (error) {
+			QueryTokenFree (head);
+			continue;
+		}
+
+		// length
+		uint16_t dlen;
+		memcpy (&dlen, &packed.data[offset], sizeof (dlen));
+		offset += sizeof (dlen);
+		dlen = xm_min (dlen, len - offset);
+
+
+		// data is handled last for reasons that will become obvious
+
+		// build structure
+		s->key = strdup (node->token);
+		QueryTokenFree (head);	// we no longer need this
+		if (!s->key) {
+			continue;
+		}
+
+		s->type = type;
+		s->len = dlen;
+
+		// data
+		switch (s->type) {
+			case STRUCTURE_TYPE_NULL:
+			case STRUCTURE_TYPE_SUB:
+			default: {	// we'll have a dangler in the tree - make it safe
+				s->count = 0;
+				s->children = NULL;
+				break;
+			}
+
+			case STRUCTURE_TYPE_BLOB:
+			case STRUCTURE_TYPE_STRING: {
+				s->blob = malloc (s->len);
+				if (!s->blob) {	// dangler time - safety first, kids!
+					s->len = 0;
+					break;
+				}
+
+				memcpy (s->blob, &packed.data[offset], s->len);
+				break;
+			}
+
+			case STRUCTURE_TYPE_I64:
+			case STRUCTURE_TYPE_U64:
+			case STRUCTURE_TYPE_H64:
+			case STRUCTURE_TYPE_F64:
+			case STRUCTURE_TYPE_TIME:
+			case STRUCTURE_TYPE_UNIXTIME: {
+				memcpy (&s->i64, &packed.data[offset], s->len);
+				break;
+			}
+		}
+	}
+
+	return root;
 }

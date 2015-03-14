@@ -9,6 +9,7 @@
 
 #include "backend/backend.h"
 #include "checksum.h"
+#include "query.h"
 
 //===	Defines
 
