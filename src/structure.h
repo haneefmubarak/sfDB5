@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "backend/backend.h"
 #include "checksum.h"
@@ -76,5 +77,5 @@ static inline void StructureSortChildren (structure *s) {
 int StructureAddChildren	(structure *parent, const structure *children, int count);
 void StructureFree		(structure *s);
 
-kv_string *StructurePack	(const structure *s);
-structure *StructureUnpack	(const kv_string *packed);
+kv_string StructurePack		(const structure *s);
+structure *StructureUnpack	(const kv_string packed);

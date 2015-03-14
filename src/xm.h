@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 //===	Defines
 
@@ -26,6 +27,16 @@
 		_r[_l + 1] = 0;	\
 		_r;	\
 	})
+
+#define xm_strdupa(s)	({	\
+		uint8_t *_s = (uint8_t *) (s);	\
+		size_t _l = strlen (_s);	\
+		uint8_t *_r = alloca (_l + 1);	\
+		strncpy (_r, _s, _l);	\
+		_r[_l + 1] = 0;	\
+		_r;	\
+	})
+
 
 #define xmattr_constant	__attribute__((const))
 #define xmattr_malloc	__attribute__((malloc))

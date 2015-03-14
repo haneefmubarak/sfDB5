@@ -24,12 +24,12 @@ int StructureAddChildren (structure *parent, const structure *children, int coun
 	return 0;
 }
 
-static void internal_structure_free (structure s) {
+static void internal__structure_free (structure s) {
 	switch (s.type) {
 		case STRUCTURE_TYPE_SUB: {
 			int x;
 			for (x = 0; x < s.count; x++)
-				internal_structure_free (s.children[x]);
+				internal__structure_free (s.children[x]);
 			// fallthough to next code
 		}
 
@@ -59,256 +59,197 @@ static void internal_structure_free (structure s) {
 }
 
 void StructureFree (structure *s) {
-	internal_structure_free (*s);
+	internal__structure_free (*s);
 	free (s);
 	return;
 }
 
-static int internal_serialize_getlen (const structure *s) {
-	int len = 0;
+struct i64_pair {
+	int64_t	len;
+	int64_t	count;
+};
+
+static struct i64_pair internal__structure_traverse_prepare (const structure *s, int64_t keylen, int64_t depth) {
+	struct i64_pair r = { 0 };
+
+	if (depth == 0)
+		keylen += strlen (s->key);
+	else
+		keylen += 1 + strlen (s->key);	// '.' + key
+
 	switch (s->type) {
-		// this structure is invalid
-		default:
-		case STRUCTURE_TYPE_NULL: {
-			return 0;
+		case STRUCTURE_TYPE_NULL:
+		default: {
+			return r;	// we don't need this
 		}
 
-		// structure containing data
 		case STRUCTURE_TYPE_SUB: {
 			int x;
-			for (x = 0; x < s->count; x++)
-				len += internal_serialize_getlen (&s->children[x]);
-			goto BASESIZE_ISGL;
+			struct i64_pair t;
+			depth++;
+			for (x = 0; x < s->count; x++) {
+				t = internal__structure_traverse_prepare (&s->children[x], keylen, depth);
+				r.len	+= t.len;
+				r.count	+= t.count;
+			}
+
+			return r;
 		}
 
 		case STRUCTURE_TYPE_BLOB:
 		case STRUCTURE_TYPE_STRING: {
-			len += s->len;
-			goto BASESIZE_ISGL;
+			r.count	= 1;
+			r.len	= s->len;
+			r.len	+= keylen + strlen (s->key) + 1;	// NULL terminator
+			r.len	+= 1 + 2;	// u8 type + u16 len
+
+			return r;
 		}
 
-		BASESIZE_ISGL:	// common sizes to all valid structures
-		// all of these are flat
 		case STRUCTURE_TYPE_I64:
 		case STRUCTURE_TYPE_U64:
 		case STRUCTURE_TYPE_H64:
 		case STRUCTURE_TYPE_F64:
 		case STRUCTURE_TYPE_TIME:
 		case STRUCTURE_TYPE_UNIXTIME: {
-			len += strlen (s->key) + 1;	// NULL terminator
-			len += sizeof (structure);
+			r.count	= 1;
+			r.len	= sizeof (int64_t);
+			r.len	+= keylen + strlen (s->key) + 1;	// NULL terminator
+			r.len	+= 1 + 2;	// u8 type + u16 len
+
+			return r;
+		}
+	}
+}
+
+static void internal__structure_traverse_pack (const structure *s, uint32_t *offset,	\
+						kv_string stream, const uint8_t *k,
+						int64_t depth) {
+	uint8_t *key;
+
+	switch (s->type) {
+		case STRUCTURE_TYPE_NULL:
+		default: {
+			return;
+		}
+
+		case STRUCTURE_TYPE_SUB:
+		case STRUCTURE_TYPE_I64:
+		case STRUCTURE_TYPE_U64:
+		case STRUCTURE_TYPE_H64:
+		case STRUCTURE_TYPE_F64:
+		case STRUCTURE_TYPE_BLOB:
+		case STRUCTURE_TYPE_STRING:
+		case STRUCTURE_TYPE_TIME:
+		case STRUCTURE_TYPE_UNIXTIME: {
+			if (xm_unlikely (depth == 0))
+				key = xm_strdupa (s->key);
+			else {
+				// max size checked earlier
+				int tlen = strlen (k) + 1 + strlen (s->key) + 1; // k + '.' + key + NULL
+				key = alloca (tlen);
+
+				snprintf (key, tlen, "%s.%s", k, s->key);
+			}
+
 			break;
 		}
 	}
 
-	return len;
-}
-
-static void internal_serialize_pack (const structure *s, uint8_t *stream, int *pos) {
 	switch (s->type) {
-		default:
-		case STRUCTURE_TYPE_NULL: {
-			return;	// skip
-		}
-
 		case STRUCTURE_TYPE_SUB: {
-			structure *t = (void *) &stream[*pos];
-			*t = *s;	// copy the data over
-			// increase compressibility
-			t->key	= NULL;
-			t->children = NULL;
-			*pos += sizeof (structure);
-
-			int len = strlen (s->key) + 1;	// NULL terminator
-			memcpy (&stream[*pos], s->key, len);	// we need the len anyways
-			*pos += len;
-
-			// we already know how many substructures there are (s->count)
 			int x;
+			depth++;
 			for (x = 0; x < s->count; x++)
-				internal_serialize_pack (&s->children[x], stream, pos);
-
-			break;
+				internal__structure_traverse_pack (&s->children[x],	\
+									offset, stream,	\
+									key, depth);
+			return;
 		}
 
 		case STRUCTURE_TYPE_BLOB:
 		case STRUCTURE_TYPE_STRING: {
-			structure *t = (void *) &stream[*pos];
-			*t = *s;	// copy the data over
-			// increase compressibility
-			t->key	= NULL;
-			t->blob	= NULL;
-			*pos += sizeof (structure);
+			// type
+			memcpy (&stream.data[*offset], &s->type, sizeof (s->type));
+			*offset += sizeof (s->type);
+			// key
+			strcpy (&stream.data[*offset], key);
+			*offset += strlen (key) + 1;	// key + NULL
 
-			int len = strlen (s->key) + 1;	// NULL terminator
-			memcpy (&stream[*pos], s->key, len);	// we need the len anyways
-			*pos += len;
+			// len
+			memcpy (&stream.data[*offset], &s->len, sizeof (s->len));
+			*offset += sizeof (s->len);
+			// data
+			memcpy (&stream.data[*offset], s->blob, s->len);
+			*offset += s->len;
 
-			// we already know how large the payload is (s->len)
-			memcpy (&stream[*pos], s->blob, s->len);
-			*pos += s->len;
-
-			break;
+			return;
 		}
 
-		// all of these are flat
 		case STRUCTURE_TYPE_I64:
 		case STRUCTURE_TYPE_U64:
 		case STRUCTURE_TYPE_H64:
 		case STRUCTURE_TYPE_F64:
 		case STRUCTURE_TYPE_TIME:
 		case STRUCTURE_TYPE_UNIXTIME: {
-			structure *t = (void *) &stream[*pos];
-			*t = *s;	// copy the data over
-			// increase compressibility
-			t->key	= NULL;
-			*pos += sizeof (structure);
+			// type
+			memcpy (&stream.data[*offset], &s->type, sizeof (s->type));
+			*offset += sizeof (s->type);
+			// key
+			strcpy (&stream.data[*offset], key);
+			*offset += strlen (key) + 1;	// key + NULL
 
-			int len = strlen (s->key) + 1;	// NULL terminator
-			memcpy (&stream[*pos], s->key, len);	// we need the len anyways
-			*pos += len;
+			// len
+			uint16_t len = sizeof (int64_t);
+			memcpy (&stream.data[*offset], &len, sizeof (len));
+			*offset += sizeof (len);
+			// data
+			memcpy (&stream.data[*offset], &s->i64, sizeof (int64_t));
+			*offset += sizeof (int64_t);
 
-			break;
+			return;
 		}
-
 	}
-
-	return;
 }
 
-kv_string *StructurePack (const structure *s) {
-	int len = internal_serialize_getlen (s);	// Pass I: get length of structures
-	if (!len)
-		return NULL;
-	kv_string *packed = malloc (sizeof (kv_string));
-	if (!packed)
-		return NULL;
-	packed->data = malloc (len);
-	if (!packed->data) {
-		free (packed);
-		return NULL;
-	}
-	packed->len = len + sizeof (checksum_t);
+kv_string StructurePack (const structure *s) {
+	// pseudo structure result:
+	//
+	//	packed {
+	//		u32	len;	// packed total len (including this)
+	//		u16	count;	// field count
+	//		quad[count] {
+	//				u8	type;
+	//				str	key;	// NULL terminated
+	//				u16	len;	// data length (max 16M-1)
+	//				type	data;
+	//		}
+	//	}
 
-	// pack it up
-	int pos = 0;
-	internal_serialize_pack (s, packed->data, &pos);	// Pass II: pack it together
-	checksum_t *sum = (void *) &packed->data[packed->len - sizeof (checksum_t)];
-	*sum = checksum (packed->data, packed->len - sizeof (checksum_t));	// detect bit errors
+	const kv_string empty = { .data = NULL, .len = 0 };
+
+	struct i64_pair t = internal__structure_traverse_prepare (s, 0, 0);
+	t.len += 4 + 2;	// u32 len + u16 count
+	if (t.count > ((1 << 16) - 1) || t.len > ((1 << 24) - 1))
+		return empty;
+	const uint32_t len	= t.len;
+	const uint16_t count	= t.count;
+
+	// initialize kv_string structure
+	kv_string packed;
+	packed.data = malloc (len);
+	if (!packed.data)
+		return empty;
+	packed.len = len;
+
+	uint32_t offset = 0;
+	memcpy (&packed.data[offset], &len, sizeof (len));
+	offset += sizeof (len);
+	memcpy (&packed.data[offset], &count, sizeof (count));
+	offset += sizeof (count);
+
+	const uint8_t nullterm = 0;
+	internal__structure_traverse_pack (s, &offset, packed, &nullterm, 0);
 
 	return packed;
-}
-
-static structure *internal_deserialize_unpack (const kv_string *packed, int *pos) {
-	const int len = packed->len - sizeof (checksum_t);
-	if (*pos >= len)
-		return NULL;
-	structure *s = (void *) &packed->data[*pos];
-	structure *r = malloc (sizeof (structure));
-	if (!r)
-		return NULL;
-
-	switch (s->type) {
-		default:
-		case STRUCTURE_TYPE_NULL: {	// this kind of structure really shouldn't be here
-			free (r);
-			return NULL;
-		}
-
-		case STRUCTURE_TYPE_SUB: {
-			*r = *s;	// copy the data over
-			*pos += sizeof (structure);
-
-			// copy the key over
-			r->key = strndup (&packed->data[*pos],	\
-						xm_min (packed->len - *pos, 255));
-						// max keysize of 255 chars
-			if (!r->key) {
-				free (r);
-				return NULL;
-			}
-			*pos += strlen (r->key) + 1;	// NULL terminator
-
-			// when building up substructures, clean up if we get a bad one
-			r->count = 0;	// adding structures needs to increment this
-			int x;
-			for (x = 0; x < s->count; x++) {
-				structure *t = internal_deserialize_unpack (packed, pos);
-				if (!t) {
-					StructureFree (r);
-					return NULL;
-				}
-				StructureAddChildren (r, t, 1);
-			}
-
-			break;
-		}
-
-
-		case STRUCTURE_TYPE_BLOB:
-		case STRUCTURE_TYPE_STRING: {
-			*r = *s;	// copy the data over
-			*pos += sizeof (structure);
-
-			// copy the key over
-			r->key = strndup (&packed->data[*pos],	\
-						xm_min (packed->len - *pos, 255));
-						// max keysize of 255 chars
-			if (!r->key) {
-				free (r);
-				return NULL;
-			}
-			*pos += strlen (r->key) + 1;	// NULL terminator
-
-			// copy the blob / string over
-			r->blob = malloc (r->len);
-			if (!r->blob) {
-				free (r->key);
-				free (r);
-				return NULL;
-			}
-			memcpy (r->blob, &packed->data[*pos], r->len);
-			*pos += r->len;
-
-			break;
-		}
-
-		// all of these are flat
-		case STRUCTURE_TYPE_I64:
-		case STRUCTURE_TYPE_U64:
-		case STRUCTURE_TYPE_H64:
-		case STRUCTURE_TYPE_F64:
-		case STRUCTURE_TYPE_TIME:
-		case STRUCTURE_TYPE_UNIXTIME: {
-			*r = *s;	// copy the data over
-			*pos += sizeof (structure);
-
-			// copy the key over
-			r->key = strndup (&packed->data[*pos],	\
-						xm_min (packed->len - *pos, 255));
-						// max keysize of 255 chars
-			if (!r->key) {
-				free (r);
-				return NULL;
-			}
-			*pos += strlen (r->key) + 1;	// NULL terminator
-
-			break;
-		}
-
-	}
-
-	return r;
-}
-
-
-structure *StructureUnpack (const kv_string *packed) {
-	// validate checksum
-	checksum_t *sum = (void *) &packed->data[packed->len - sizeof (checksum_t)];
-	if (*sum != checksum (packed->data, packed->len - sizeof (checksum_t)))
-		return NULL;	// checksum does not match
-
-	int pos = 0;
-	structure *r = internal_deserialize_unpack (packed, &pos);
-	return r;	// if NULL - that'll get returned too
 }
