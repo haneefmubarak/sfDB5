@@ -24,7 +24,7 @@ void printstructure (const structure *s) {
 		}
 
 		case STRUCTURE_TYPE_STRING: {
-			assert (s->len == (strlen (s->string) + 1));	// NULL terminator
+//			assert (s->len == (strlen (s->string) + 1));	// NULL terminator
 			printf ("Structure:\n"	\
 				"\tType:\t%s\n"	\
 				"\tKey:\t%s\n"	\
@@ -73,9 +73,9 @@ void test (void) {
 	// lets try some nesting
 	// head	+>	child ->	number
 	//	->	string
+	StructureAddChildren (child, number, 1);
 	StructureAddChildren (head, string, 1);
 	StructureAddChildren (head, child, 1);
-	StructureAddChildren (child, number, 1);
 
 	// cleanup from nesting
 	free (number);
@@ -90,7 +90,7 @@ void test (void) {
 	printstructure (&head->children[0].children[0]);	// should be 'number'
 
 	// now lets pack it up
-	kv_string *packed = StructurePack (head);
+	kv_string packed = StructurePack (head);
 
 	// free all the structures at once
 	StructureFree (head);
@@ -106,7 +106,7 @@ void test (void) {
 	printstructure (&unpacked->children[0].children[0]);	// should be 'number'
 
 	// final cleanup
-	free (packed);
+	free (packed.data);
 	StructureFree (unpacked);
 
 	return;
