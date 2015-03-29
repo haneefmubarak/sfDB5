@@ -28,9 +28,7 @@ typedef struct {
 } kv_string;
 
 //=== Variables
-
 extern int xm_tlv kv_error;
-extern kv_db_t *kv_db;
 
 //=== Functions
 
@@ -39,16 +37,10 @@ int KVInitialize	(size_t cacheSize);
 void KVTerminate	(void);
 
 // overall db ops
-kv_db_t xmattr_malloc *KVDBNew	(const uint8_t *path);
-kv_db_t xmattr_malloc *KVDBOpen	(const uint8_t *path);
-void KVDBDelete	(kv_db_t *db);
-void KVDBClose	(kv_db_t *db);
-
-// current db
-static inline void KVDBSet (kv_db_t *db) {
-	kv_db = db;
-	return;
-}
+int KVDBNew	(const uint8_t *path);
+int KVDBOpen	(const uint8_t *path);
+void KVDBDelete	(void);
+void KVDBClose	(void);
 
 // batching for speed
 void KVBatchStart	(void);
@@ -57,5 +49,5 @@ void KVBatchEnd		(void);
 
 // general functions
 int KVSet	(kv_string key, kv_string value);
-int KVget	(kv_string key, kv_string *value);
+int KVGet	(kv_string key, kv_string *value);
 int KVDelete	(kv_string key);

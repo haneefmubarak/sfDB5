@@ -2,8 +2,7 @@
 
 int xm_tlv kv_error = 0;
 static char xm_tlv *internal__kv_error;
-
-kv_db_t *kv_db;
+static kv_db_t *kv_db;
 
 static int xm_tlv kv_batch_active = 0;
 static rocksdb_writebatch_t xm_tlv *kv_batch = NULL;
@@ -13,8 +12,6 @@ static size_t kv_cores;
 static rocksdb_writeoptions_t	*kv_write_options;
 static rocksdb_readoptions_t	*kv_read_options;
 static int kv_init = 0;
-
-static kv_db_t xmattr_malloc *internal__kv_open (const uint8_t *path, uint64_t flags);
 
 int KVInitialize (size_t cacheSize) {
 	kv_cachesize	= cacheSize;				// caches size in bytes
@@ -44,32 +41,24 @@ void KVTerminate (void) {
 #define	KV_OPEN_OPTION_NONE	0x00
 #define	KV_OPEN_OPTION_NEW	0x01
 
-kv_db_t xmattr_malloc *KVDBNew (const uint8_t *path) {
-	return internal__kv_open (path, KV_OPEN_OPTION_NEW);
-}
-
-kv_db_t xmattr_malloc *KVDBOpen (const uint8_t *path) {
-	return internal__kv_open (path, KV_OPEN_OPTION_NONE);
-}
-
-static kv_db_t xmattr_malloc *internal__kv_open (const uint8_t *path, uint64_t flags) {
+static int internal__kv_open (const uint8_t *path, uint64_t flags) {
 	if (!path)
 		kv_error = KV_ERR_NPTR;
 	if (!kv_init)
 		kv_error = KV_ERR_INIT;
 	if (kv_error)
-		return NULL;
+		return 1;
 
 	kv_rocksdb *db = malloc (sizeof (kv_rocksdb));
 	if (!db) {
 		kv_error = KV_ERR_MEM;
-		return NULL;
+		return 1;
 	}
 	db->path = strdup (path);
 	if (!db->path) {
 		kv_error = KV_ERR_MEM;
 		free (db);
-		return NULL;
+		return 1;
 	}
 
 	// options etc.
@@ -92,7 +81,17 @@ static kv_db_t xmattr_malloc *internal__kv_open (const uint8_t *path, uint64_t f
 	db->handle = rocksdb_open (db->options, db->path, &internal__kv_error);
 
 	kv_db_t *vptr = db;
-	return vptr;
+	kv_db = vptr;
+
+	return 0;
+}
+
+int KVDBNew (const uint8_t *path) {
+	return internal__kv_open (path, KV_OPEN_OPTION_NEW);
+}
+
+int KVDBOpen (const uint8_t *path) {
+	return internal__kv_open (path, KV_OPEN_OPTION_NONE);
 }
 
 static int internal__kv_rmrf_callback (const char *path, const struct stat *b,	\
@@ -100,15 +99,15 @@ static int internal__kv_rmrf_callback (const char *path, const struct stat *b,	\
 	return remove (path);
 }
 
-void KVDBDelete (kv_db_t *vptr) {
-	kv_rocksdb *db = vptr;
+void KVDBDelete (void) {
+	kv_rocksdb *db = kv_db;
 
 	// keep a copy of path without calling malloc ()
 	uint8_t *path = alloca (strlen (db->path));
 	strcpy (path, db->path);
 
 	// close the db
-	KVDBClose (vptr);
+	KVDBClose ();
 
 	// remove all db related files
 	// 256: pick a nice looking number
@@ -118,8 +117,8 @@ void KVDBDelete (kv_db_t *vptr) {
 	return;
 }
 
-void KVDBClose (kv_db_t *vptr) {
-	kv_rocksdb *db = vptr;
+void KVDBClose (void) {
+	kv_rocksdb *db = kv_db;
 
 	rocksdb_close (db->handle);
 
@@ -128,7 +127,9 @@ void KVDBClose (kv_db_t *vptr) {
 	rocksdb_options_destroy (db->options);
 	free (db->path);
 	free (db);
+	sync ();
 
+	kv_db = NULL;
 	return;
 }
 
