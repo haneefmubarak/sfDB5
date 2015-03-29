@@ -36,7 +36,6 @@ extern kv_db_t *kv_db;
 
 // startup / shutdown
 int KVInitialize	(size_t cacheSize);
-void KVCleanup		(void);
 void KVTerminate	(void);
 
 // overall db ops
@@ -53,6 +52,7 @@ static inline void KVDBSet (kv_db_t *db) {
 
 // batching for speed
 void KVBatchStart	(void);
+void KVBatchCancel	(void);
 void KVBatchEnd		(void);
 
 // general functions

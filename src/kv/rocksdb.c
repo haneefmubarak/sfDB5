@@ -34,12 +34,6 @@ int KVInitialize (size_t cacheSize) {
 	return 0;
 }
 
-void KVThreadCleanup (void) {
-	rocksdb_writebatch_destroy (kv_batch);
-
-	return;
-}
-
 void KVTerminate (void) {
 	rocksdb_writeoptions_destroy (kv_write_options);
 	rocksdb_readoptions_destroy (kv_read_options);
@@ -145,6 +139,12 @@ void KVBatchStart (void) {
 		kv_batch = rocksdb_writebatch_create ();
 
 	kv_batch_active = 1;
+	return;
+}
+
+void KVBatchCancel (void) {
+	rocksdb_writebatch_destroy (kv_batch);
+
 	return;
 }
 
