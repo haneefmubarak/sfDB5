@@ -30,7 +30,7 @@ typedef struct {
 //=== Variables
 
 extern int xm_tlv kv_error;
-extern kv_db_t xm_tlv *kv_db;
+extern kv_db_t *kv_db;
 
 //=== Functions
 

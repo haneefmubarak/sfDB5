@@ -3,7 +3,7 @@
 int xm_tlv kv_error = 0;
 static char xm_tlv *internal__kv_error;
 
-kv_db_t xm_tlv *kv_db;
+kv_db_t *kv_db;
 
 static int xm_tlv kv_batch_active = 0;
 static rocksdb_writebatch_t xm_tlv *kv_batch = NULL;
