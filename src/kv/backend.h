@@ -33,21 +33,25 @@ extern int xm_tlv kv_error;
 //=== Functions
 
 // startup / shutdown
-int KVInitialize	(size_t cacheSize);
+// (global)
+int KVInitialize	(size_t cacheSize);	// in bytes
 void KVTerminate	(void);
 
 // overall db ops
-int KVDBNew	(const uint8_t *path);
-int KVDBOpen	(const uint8_t *path);
+// (global)
+int KVDBNew	(const uint8_t *path);		// relative or absolute is okay
+int KVDBOpen	(const uint8_t *path);		// same
 void KVDBDelete	(void);
 void KVDBClose	(void);
 
 // batching for speed
+// (thread)
 void KVBatchStart	(void);
 void KVBatchCancel	(void);
 void KVBatchEnd		(void);
 
 // general functions
+// (thread)
 int KVSet	(kv_string key, kv_string value);
 int KVGet	(kv_string key, kv_string *value);
 int KVDelete	(kv_string key);
