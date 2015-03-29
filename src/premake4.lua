@@ -28,28 +28,28 @@ solution "sfDB5"
 		language "C"
 		files { "*.c", "*.h" }
 		includedirs { "../deps/sort" }
-		links { "backend", "pcre" }
+		links { "kv", "pcre" }
 		
 
 	-- choose kv-backend
 	newoption {
-		trigger = "backend",
-		value = "storage-backend",
+		trigger = "kv",
+		value = "kv-backend",
 		description = "Choose a key-value storage backend",
 		allowed = {
 			{ "rocksdb", "RocksDB" }
 		}
 	}
 
-	if not _OPTIONS["backend"] then
-		_OPTIONS["backend"] = "rocksdb"
+	if not _OPTIONS["kv"] then
+		_OPTIONS["kv"] = "rocksdb"
 	end
 
-	project "backend"
+	project "kv"
 		kind "StaticLib"
 		language "C"		
-		files { "backend/*.h" }
+		files { "kv/*.h" }
 
 		configuration "rocksdb"
 			links { "rocksdb" }			
-			files { "backend/*rocksdb*" }
+			files { "kv/*rocksdb*" }
