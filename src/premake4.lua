@@ -3,23 +3,23 @@ solution "sfDB5"
 
 	configuration "Debug"
 		defines { "_GNU_SOURCE" }
+		includedirs { "../deps" }
 		flags { "Symbols", "ExtraWarnings" }
 		buildoptions { "-pthread" }
 		buildoptions {	"-Wno-pointer-sign",
 				"-Wno-unused-function",
 				"-Wno-unused-but-set-variable",
-				"-Wno-unknown-warning",
-				"-Wno-unknown-warning-option" }
+		}
 		linkoptions { "-pthread" }
 
 	configuration "Release"
 		defines { "_GNU_SOURCE" }
+		includedirs { "../deps" }
 		buildoptions { "-pthread", "-march=native", "-O2" }
 		buildoptions {	"-Wno-pointer-sign",
 				"-Wno-unused-function",
 				"-Wno-unused-but-set-variable",
-				"-Wno-unknown-warning",
-				"-Wno-unknown-warning-option" }
+		}
 		linkoptions { "-pthread" }
 
 	-- whole project
@@ -37,19 +37,23 @@ solution "sfDB5"
 		value = "kv-backend",
 		description = "Choose a key-value storage backend",
 		allowed = {
-			{ "rocksdb", "RocksDB" }
+			{ "rocksdb", "RocksDB" },
+			{ "sophia", "Sophia" }
 		}
 	}
 
 	if not _OPTIONS["kv"] then
-		_OPTIONS["kv"] = "rocksdb"
+		_OPTIONS["kv"] = "sophia"
 	end
 
 	project "kv"
 		kind "StaticLib"
-		language "C"		
+		language "C"
 		files { "kv/*.h" }
 
 		configuration "rocksdb"
-			links { "rocksdb" }			
+			links { "rocksdb" }		
 			files { "kv/*rocksdb*" }
+
+		configuration "sophia"
+			files { "../deps/sophia/sophia.*", "kv/*sophia*" }
