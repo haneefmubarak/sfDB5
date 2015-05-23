@@ -21,7 +21,7 @@ int KVInitialize (size_t cacheSize) {
 	memory_limit	= alloca (21);	// u64 + NULL = ceil (log_10 (2^64 - 1)) + 1
 	sched_threads	= alloca (11);	// u32 + NULL = ceil (log_10 (2^32  -1)) + 1
 	snprintf (memory_limit, 21, "%" PRId64, cacheSize);
-	snprintf (sched_threads, 11, "%i" PRIu32, cores);
+	snprintf (sched_threads, 11, "%" PRIu32, cores);
 
 	db.env = sp_env ();
 	if (!db.env)
