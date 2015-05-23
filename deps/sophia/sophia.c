@@ -21,7 +21,6 @@
 
 #define SOPHIA_BUILD ""
 
-#line 1 "sophia/rt/sr_stdc.h"
 #ifndef SR_STDC_H_
 #define SR_STDC_H_
 
@@ -67,7 +66,6 @@
 #endif
 
 #endif
-#line 1 "sophia/rt/sr_macro.h"
 #ifndef SR_MACRO_H_
 #define SR_MACRO_H_
 
@@ -98,7 +96,6 @@
 #define sr_template(a, b) sr_templatecat(a, b)
 
 #endif
-#line 1 "sophia/rt/sr_version.h"
 #ifndef SR_VERSION_H_
 #define SR_VERSION_H_
 
@@ -152,7 +149,6 @@ sr_versioncheck(srversion *v)
 }
 
 #endif
-#line 1 "sophia/rt/sr_time.h"
 #ifndef SR_TIME_H_
 #define SR_TIME_H_
 
@@ -168,7 +164,6 @@ void     sr_sleep(uint64_t);
 uint64_t sr_utime(void);
 
 #endif
-#line 1 "sophia/rt/sr_spinlock.h"
 #ifndef SR_LOCK_H_
 #define SR_LOCK_H_
 
@@ -242,7 +237,6 @@ sr_spinunlock(srspinlock *l) {
 }
 
 #endif
-#line 1 "sophia/rt/sr_list.h"
 #ifndef SR_LIST_H_
 #define SR_LIST_H_
 
@@ -334,7 +328,6 @@ sr_listreplace(srlist *o, srlist *n) {
 	for (I = (H)->prev; I != H; I = (I)->prev)
 
 #endif
-#line 1 "sophia/rt/sr_pager.h"
 #ifndef SR_PAGER_H_
 #define SR_PAGER_H_
 
@@ -376,7 +369,6 @@ void *sr_pagerpop(srpager*);
 void  sr_pagerpush(srpager*, srpage*);
 
 #endif
-#line 1 "sophia/rt/sr_a.h"
 #ifndef SR_A_H_
 #define SR_A_H_
 
@@ -454,7 +446,6 @@ sr_memdup(sra *a, void *ptr, size_t size) {
 }
 
 #endif
-#line 1 "sophia/rt/sr_stda.h"
 #ifndef SR_STDA_H_
 #define SR_STDA_H_
 
@@ -469,7 +460,6 @@ sr_memdup(sra *a, void *ptr, size_t size) {
 extern sraif sr_stda;
 
 #endif
-#line 1 "sophia/rt/sr_slaba.h"
 #ifndef SR_SLABA_H_
 #define SR_SLABA_H_
 
@@ -484,7 +474,6 @@ extern sraif sr_stda;
 extern sraif sr_slaba;
 
 #endif
-#line 1 "sophia/rt/sr_error.h"
 #ifndef SR_ERROR_H_
 #define SR_ERROR_H_
 
@@ -605,7 +594,6 @@ sr_errorset(srerror *e, int type,
 	sr_errorset(e, SR_ERROR, __FILE__, __FUNCTION__, __LINE__, fmt, __VA_ARGS__)
 
 #endif
-#line 1 "sophia/rt/sr_trace.h"
 #ifndef SR_TRACE_H_
 #define SR_TRACE_H_
 
@@ -680,7 +668,6 @@ sr_traceset(srtrace *t,
 	sr_traceset(t, __FILE__, __FUNCTION__, __LINE__, fmt, __VA_ARGS__)
 
 #endif
-#line 1 "sophia/rt/sr_gc.h"
 #ifndef SR_GC_H_
 #define SR_GC_H_
 
@@ -789,7 +776,6 @@ sr_gcgarbage(srgc *gc)
 }
 
 #endif
-#line 1 "sophia/rt/sr_seq.h"
 #ifndef SR_SEQ_H_
 #define SR_SEQ_H_
 
@@ -897,7 +883,6 @@ sr_seq(srseq *n, srseqop op)
 }
 
 #endif
-#line 1 "sophia/rt/sr_order.h"
 #ifndef SR_ORDER_H_
 #define SR_ORDER_H_
 
@@ -958,7 +943,6 @@ sr_ordername(srorder o)
 }
 
 #endif
-#line 1 "sophia/rt/sr_trigger.h"
 #ifndef SR_TRIGGER_H_
 #define SR_TRIGGER_H_
 
@@ -993,7 +977,6 @@ sr_triggerrun(srtrigger *t, void *object)
 }
 
 #endif
-#line 1 "sophia/rt/sr_cmp.h"
 #ifndef SR_CMP_H_
 #define SR_CMP_H_
 
@@ -1038,7 +1021,6 @@ int sr_cmpset_prefix(srcomparator*, char*);
 int sr_cmpset_prefixarg(srcomparator*, char*);
 
 #endif
-#line 1 "sophia/rt/sr_buf.h"
 #ifndef SR_BUF_H_
 #define SR_BUF_H_
 
@@ -1186,7 +1168,6 @@ sr_bufset(srbuf *b, int size, int i, char *buf, int bufsize)
 }
 
 #endif
-#line 1 "sophia/rt/sr_injection.h"
 #ifndef SR_INJECTION_H_
 #define SR_INJECTION_H_
 
@@ -1224,7 +1205,6 @@ struct srinjection {
 #endif
 
 #endif
-#line 1 "sophia/rt/sr_crc.h"
 #ifndef SR_CRC_H_
 #define SR_CRC_H_
 
@@ -1247,7 +1227,6 @@ srcrcf sr_crc32c_function(void);
 	F(crc, (char*)p + sizeof(uint32_t), size - sizeof(uint32_t))
 
 #endif
-#line 1 "sophia/rt/sr.h"
 #ifndef SR_H_
 #define SR_H_
 
@@ -1291,7 +1270,6 @@ sr_init(sr *r,
 }
 
 #endif
-#line 1 "sophia/rt/sr_filter.h"
 #ifndef SR_FILTER_H_
 #define SR_FILTER_H_
 
@@ -1372,7 +1350,6 @@ sr_filtercomplete(srfilter *c, srbuf *dest)
 }
 
 #endif
-#line 1 "sophia/rt/sr_c.h"
 #ifndef SR_C_H_
 #define SR_C_H_
 
@@ -1486,7 +1463,6 @@ sr_cptr(src *c, void *ptr) {
 }
 
 #endif
-#line 1 "sophia/rt/sr_iter.h"
 #ifndef SR_ITER_H_
 #define SR_ITER_H_
 
@@ -1532,7 +1508,6 @@ do { \
 #define sr_iteratornext(i) (i)->vif->next(i)
 
 #endif
-#line 1 "sophia/rt/sr_bufiter.h"
 #ifndef SR_BUFITER_H_
 #define SR_BUFITER_H_
 
@@ -1629,7 +1604,6 @@ sr_bufiterref_next(sriter *i) {
 }
 
 #endif
-#line 1 "sophia/rt/sr_mutex.h"
 #ifndef SR_MUTEX_H_
 #define SR_MUTEX_H_
 
@@ -1668,7 +1642,6 @@ sr_mutexunlock(srmutex *m) {
 }
 
 #endif
-#line 1 "sophia/rt/sr_cond.h"
 #ifndef SR_COND_H_
 #define SR_COND_H_
 
@@ -1707,7 +1680,6 @@ sr_condwait(srcond *c, srmutex *m) {
 }
 
 #endif
-#line 1 "sophia/rt/sr_thread.h"
 #ifndef SR_THREAD_H_
 #define SR_THREAD_H_
 
@@ -1732,7 +1704,6 @@ int sr_threadnew(srthread*, srthreadf, void*);
 int sr_threadjoin(srthread*);
 
 #endif
-#line 1 "sophia/rt/sr_quota.h"
 #ifndef SR_QUOTA_H_
 #define SR_QUOTA_H_
 
@@ -1790,7 +1761,6 @@ sr_quotaused_percent(srquota *q)
 }
 
 #endif
-#line 1 "sophia/rt/sr_rb.h"
 #ifndef SR_RB_H_
 #define SR_RB_H_
 
@@ -1873,7 +1843,6 @@ void sr_rbreplace(srrb*, srrbnode*, srrbnode*);
 void sr_rbremove(srrb*, srrbnode*);
 
 #endif
-#line 1 "sophia/rt/sr_rq.h"
 #ifndef SR_RQ_H_
 #define SR_RQ_H_
 
@@ -2017,7 +1986,6 @@ sr_rqprev(srrq *q, srrqnode *n)
 }
 
 #endif
-#line 1 "sophia/rt/sr_path.h"
 #ifndef SR_PATH_H_
 #define SR_PATH_H_
 
@@ -2057,7 +2025,6 @@ sr_pathAB(srpath *p, char *dir, uint32_t a, uint32_t b, char *ext)
 }
 
 #endif
-#line 1 "sophia/rt/sr_iov.h"
 #ifndef SD_IOV_H_
 #define SD_IOV_H_
 
@@ -2110,7 +2077,6 @@ sr_iovadd(sriov *v, void *ptr, size_t size)
 }
 
 #endif
-#line 1 "sophia/rt/sr_file.h"
 #ifndef SR_FILE_H_
 #define SR_FILE_H_
 
@@ -2164,7 +2130,6 @@ int sr_fileunlock(srfile*);
 int sr_filerlb(srfile*, uint64_t);
 
 #endif
-#line 1 "sophia/rt/sr_dir.h"
 #ifndef SR_DIR_H_
 #define SR_DIR_H_
 
@@ -2193,7 +2158,6 @@ struct srdirid {
 int sr_dirread(srbuf*, sra*, srdirtype*, char*);
 
 #endif
-#line 1 "sophia/rt/sr_map.h"
 #ifndef SR_MAP_H_
 #define SR_MAP_H_
 
@@ -2228,7 +2192,6 @@ sr_mapfile(srmap *map, srfile *f, int ro)
 }
 
 #endif
-#line 1 "sophia/rt/sr_lz4filter.h"
 #ifndef SR_LZ4FILTER_H_
 #define SR_LZ4FILTER_H_
 
@@ -2243,7 +2206,6 @@ sr_mapfile(srmap *map, srfile *f, int ro)
 extern srfilterif sr_lz4filter;
 
 #endif
-#line 1 "sophia/rt/sr_zstdfilter.h"
 #ifndef SR_ZSTDFILTER_H_
 #define SR_ZSTDFILTER_H_
 
@@ -2258,7 +2220,6 @@ extern srfilterif sr_lz4filter;
 extern srfilterif sr_zstdfilter;
 
 #endif
-#line 1 "sophia/rt/sr_bufiter.c"
 
 /*
  * sophia database
@@ -2285,7 +2246,6 @@ sriterif sr_bufiterref =
 	.of      = sr_bufiterref_of,
 	.next    = sr_bufiterref_next
 };
-#line 1 "sophia/rt/sr_c.c"
 
 /*
  * sophia database
@@ -2471,7 +2431,6 @@ int sr_cset(src *c, srcstmt *stmt, char *value)
 	}
 	return 0;
 }
-#line 1 "sophia/rt/sr_cmp.c"
 
 /*
  * sophia database
@@ -2590,7 +2549,6 @@ int sr_cmpset_prefixarg(srcomparator *c, char *name)
 	c->prefixarg = ptr;
 	return 0;
 }
-#line 1 "sophia/rt/sr_crc.c"
 
 /*
  * sophia database
@@ -3005,7 +2963,6 @@ srcrcf sr_crc32c_function(void)
 #endif
 	return sr_crc32c_sw;
 }
-#line 1 "sophia/rt/sr_dir.c"
 
 /*
  * sophia database
@@ -3113,7 +3070,6 @@ error:
 	closedir(d);
 	return -1;
 }
-#line 1 "sophia/rt/sr_file.c"
 
 /*
  * sophia database
@@ -3342,7 +3298,6 @@ int sr_filerlb(srfile *f, uint64_t svp)
 		return -1;
 	return 0;
 }
-#line 1 "sophia/rt/sr_lz4filter.c"
 
 /*
  * sophia database
@@ -8705,7 +8660,6 @@ srfilterif sr_lz4filter =
 	.next     = sr_lz4filter_next,
 	.complete = sr_lz4filter_complete
 };
-#line 1 "sophia/rt/sr_map.c"
 
 /*
  * sophia database
@@ -8739,7 +8693,6 @@ int sr_mapunmap(srmap *m)
 	m->p = NULL;
 	return rc;
 }
-#line 1 "sophia/rt/sr_pager.c"
 
 /*
  * sophia database
@@ -8825,7 +8778,6 @@ void sr_pagerpush(srpager *p, srpage *page)
 	page->next = p->p;
 	p->p = page;
 }
-#line 1 "sophia/rt/sr_quota.c"
 
 /*
  * sophia database
@@ -8893,7 +8845,6 @@ int sr_quota(srquota *q, srquotaop op, uint64_t v)
 	sr_mutexunlock(&q->lock);
 	return 0;
 }
-#line 1 "sophia/rt/sr_rb.c"
 
 /*
  * sophia database
@@ -9217,7 +9168,6 @@ void sr_rbremove(srrb *t, srrbnode *n)
 	if (n)
 		n->color = SR_RBBLACK;
 }
-#line 1 "sophia/rt/sr_slaba.c"
 
 /*
  * sophia database
@@ -9338,7 +9288,6 @@ sraif sr_slaba =
 	.realloc = NULL,
 	.free    = sr_slabafree 
 };
-#line 1 "sophia/rt/sr_stda.c"
 
 /*
  * sophia database
@@ -9384,7 +9333,6 @@ sraif sr_stda =
 	.realloc = sr_stdarealloc,
 	.free    = sr_stdafree 
 };
-#line 1 "sophia/rt/sr_thread.c"
 
 /*
  * sophia database
@@ -9406,7 +9354,6 @@ int sr_threadjoin(srthread *t)
 {
 	return pthread_join(t->id, NULL);
 }
-#line 1 "sophia/rt/sr_time.c"
 
 /*
  * sophia database
@@ -9432,7 +9379,6 @@ uint64_t sr_utime(void)
 	gettimeofday(&t, NULL);
 	return t.tv_sec * 1000000ULL + t.tv_usec;
 }
-#line 1 "sophia/rt/sr_trigger.c"
 
 /*
  * sophia database
@@ -9484,7 +9430,6 @@ int sr_triggersetarg(srtrigger *t, char *name)
 	t->arg = ptr;
 	return 0;
 }
-#line 1 "sophia/rt/sr_zstdfilter.c"
 
 /*
  * sophia database
@@ -13507,7 +13452,6 @@ srfilterif sr_zstdfilter =
 	.next     = sr_zstdfilter_next,
 	.complete = sr_zstdfilter_complete
 };
-#line 1 "sophia/version/sv.h"
 #ifndef SV_H_
 #define SV_H_
 
@@ -13593,7 +13537,6 @@ sv_compare(sv *a, sv *b, srcomparator *c) {
 }
 
 #endif
-#line 1 "sophia/version/sv_local.h"
 #ifndef SV_LOCAL_H_
 #define SV_LOCAL_H_
 
@@ -13640,7 +13583,6 @@ sv_copy(sra *a, sv *v)
 }
 
 #endif
-#line 1 "sophia/version/sv_log.h"
 #ifndef SV_LOG_H_
 #define SV_LOG_H_
 
@@ -13740,7 +13682,6 @@ sv_logreplace(svlog *l, int n, svlogv *v)
 }
 
 #endif
-#line 1 "sophia/version/sv_merge.h"
 #ifndef SV_MERGE_H_
 #define SV_MERGE_H_
 
@@ -13808,7 +13749,6 @@ sv_mergenextof(svmergesrc *src) {
 }
 
 #endif
-#line 1 "sophia/version/sv_mergeiter.h"
 #ifndef SV_MERGEITER_H_
 #define SV_MERGEITER_H_
 
@@ -13996,7 +13936,6 @@ sv_mergeisdup(sriter *i)
 extern sriterif sv_mergeiter;
 
 #endif
-#line 1 "sophia/version/sv_readiter.h"
 #ifndef SV_READITER_H_
 #define SV_READITER_H_
 
@@ -14089,7 +14028,6 @@ sv_readiter_of(sriter *i)
 extern sriterif sv_readiter;
 
 #endif
-#line 1 "sophia/version/sv_writeiter.h"
 #ifndef SV_WRITEITER_H_
 #define SV_WRITEITER_H_
 
@@ -14211,7 +14149,6 @@ sv_writeiter_resume(sriter *i)
 extern sriterif sv_writeiter;
 
 #endif
-#line 1 "sophia/version/sv_v.h"
 #ifndef SV_V_H_
 #define SV_V_H_
 
@@ -14297,7 +14234,6 @@ sv_vsizeof(sv *v) {
 }
 
 #endif
-#line 1 "sophia/version/sv_index.h"
 #ifndef SC_INDEX_H_
 #define SC_INDEX_H_
 
@@ -14334,7 +14270,6 @@ sv_indexused(svindex *i) {
 }
 
 #endif
-#line 1 "sophia/version/sv_indexiter.h"
 #ifndef SV_INDEXITER_H_
 #define SV_INDEXITER_H_
 
@@ -14591,7 +14526,6 @@ extern sriterif sv_indexiter;
 extern sriterif sv_indexiterraw;
 
 #endif
-#line 1 "sophia/version/sv_index.c"
 
 /*
  * sophia database
@@ -14711,7 +14645,6 @@ int sv_indexset(svindex *i, sr *r, uint64_t vlsn srunused,
 		i->keymax = v->keysize;
 	return 0;
 }
-#line 1 "sophia/version/sv_indexiter.c"
 
 /*
  * sophia database
@@ -14739,7 +14672,6 @@ sriterif sv_indexiterraw =
 	.of      = sv_indexiterraw_of,
 	.next    = sv_indexiterraw_next
 };
-#line 1 "sophia/version/sv_local.c"
 
 /*
  * sophia database
@@ -14799,7 +14731,6 @@ svif sv_localif =
 	.value     = sv_localifvalue,
 	.valuesize = sv_localifvaluesize
 };
-#line 1 "sophia/version/sv_mergeiter.c"
 
 /*
  * sophia database
@@ -14819,7 +14750,6 @@ sriterif sv_mergeiter =
 	.of    = sv_mergeiter_of,
 	.next  = sv_mergeiter_next
 };
-#line 1 "sophia/version/sv_readiter.c"
 
 /*
  * sophia database
@@ -14839,7 +14769,6 @@ sriterif sv_readiter =
 	.of      = sv_readiter_of,
 	.next    = sv_readiter_next
 };
-#line 1 "sophia/version/sv_v.c"
 
 /*
  * sophia database
@@ -14901,7 +14830,6 @@ svif sv_vif =
 	.value     = sv_vifvalue,
 	.valuesize = sv_vifvaluesize
 };
-#line 1 "sophia/version/sv_writeiter.c"
 
 /*
  * sophia database
@@ -14921,7 +14849,6 @@ sriterif sv_writeiter =
 	.of      = sv_writeiter_of,
 	.next    = sv_writeiter_next
 };
-#line 1 "sophia/transaction/sx_v.h"
 #ifndef SX_V_H_
 #define SX_V_H_
 
@@ -15020,7 +14947,6 @@ sx_vabortwaiters(sxv *v) {
 }
 
 #endif
-#line 1 "sophia/transaction/sx.h"
 #ifndef SX_H_
 #define SX_H_
 
@@ -15093,7 +15019,6 @@ sxstate   sx_setstmt(sxmanager*, sxindex*, sv*);
 sxstate   sx_getstmt(sxmanager*, sxindex*);
 
 #endif
-#line 1 "sophia/transaction/sx_deadlock.h"
 #ifndef SX_DEADLOCK_H_
 #define SX_DEADLOCK_H_
 
@@ -15108,7 +15033,6 @@ sxstate   sx_getstmt(sxmanager*, sxindex*);
 int sx_deadlock(sx*);
 
 #endif
-#line 1 "sophia/transaction/sx.c"
 
 /*
  * sophia database
@@ -15445,7 +15369,6 @@ sxstate sx_getstmt(sxmanager *m, sxindex *index srunused)
 	sr_seq(m->r->seq, SR_TSNNEXT);
 	return SXCOMMIT;
 }
-#line 1 "sophia/transaction/sx_deadlock.c"
 
 /*
  * sophia database
@@ -15526,7 +15449,6 @@ int sx_deadlock(sx *t)
 	sx_deadlock_unmark(&mark);
 	return 0;
 }
-#line 1 "sophia/transaction/sx_v.c"
 
 /*
  * sophia database
@@ -15589,7 +15511,6 @@ svif sx_vif =
 	.value     = sx_vifvalue,
 	.valuesize = sx_vifvaluesize
 };
-#line 1 "sophia/log/sl_conf.h"
 #ifndef SL_CONF_H_
 #define SL_CONF_H_
 
@@ -15612,7 +15533,6 @@ struct slconf {
 };
 
 #endif
-#line 1 "sophia/log/sl_v.h"
 #ifndef SL_V_H_
 #define SL_V_H_
 
@@ -15644,7 +15564,6 @@ sl_vdsn(sv *v) {
 }
 
 #endif
-#line 1 "sophia/log/sl.h"
 #ifndef SL_H_
 #define SL_H_
 
@@ -15703,7 +15622,6 @@ int sl_rollback(sltx*);
 int sl_write(sltx*, svlog*);
 
 #endif
-#line 1 "sophia/log/sl_iter.h"
 #ifndef SL_ITER_H_
 #define SL_ITER_H_
 
@@ -15722,7 +15640,6 @@ int sl_iter_continue(sriter*);
 extern sriterif sl_iter;
 
 #endif
-#line 1 "sophia/log/sl.c"
 
 /*
  * sophia database
@@ -16269,7 +16186,6 @@ int sl_write(sltx *t, svlog *vlog)
 	}
 	return 0;
 }
-#line 1 "sophia/log/sl_iter.c"
 
 /*
  * sophia database
@@ -16487,7 +16403,6 @@ int sl_iter_continue(sriter *i)
 {
 	return sl_itercontinue_of(i);
 }
-#line 1 "sophia/log/sl_v.c"
 
 /*
  * sophia database
@@ -16543,7 +16458,6 @@ svif sl_vif =
 	.value     = sl_vifvalue,
 	.valuesize = sl_vifvaluesize
 };
-#line 1 "sophia/database/sd_id.h"
 #ifndef SD_ID_H_
 #define SD_ID_H_
 
@@ -16574,7 +16488,6 @@ sd_idinit(sdid *i, uint32_t id, uint32_t parent, uint32_t flags)
 }
 
 #endif
-#line 1 "sophia/database/sd_v.h"
 #ifndef SD_V_H_
 #define SD_V_H_
 
@@ -16601,7 +16514,6 @@ struct sdv {
 extern svif sd_vif;
 
 #endif
-#line 1 "sophia/database/sd_page.h"
 #ifndef SD_PAGE_H_
 #define SD_PAGE_H_
 
@@ -16670,7 +16582,6 @@ sd_pagemax(sdpage *p) {
 }
 
 #endif
-#line 1 "sophia/database/sd_pageiter.h"
 #ifndef SD_PAGEITER_H_
 #define SD_PAGEITER_H_
 
@@ -17119,7 +17030,6 @@ extern sriterif sd_pageiter;
 extern sriterif sd_pageiterraw;
 
 #endif
-#line 1 "sophia/database/sd_index.h"
 #ifndef SD_INDEX_H_
 #define SD_INDEX_H_
 
@@ -17267,7 +17177,6 @@ int sd_indexadd(sdindex*, sr*, uint64_t, uint32_t, uint32_t,
 int sd_indexcopy(sdindex*, sr*, sdindexheader*);
 
 #endif
-#line 1 "sophia/database/sd_indexiter.h"
 #ifndef SD_INDEXITER_H_
 #define SD_INDEXITER_H_
 
@@ -17446,7 +17355,6 @@ sd_indexiter_next(sriter *i)
 extern sriterif sd_indexiter;
 
 #endif
-#line 1 "sophia/database/sd_seal.h"
 #ifndef SD_SEAL_H_
 #define SD_SEAL_H_
 
@@ -17488,7 +17396,6 @@ sd_sealvalidate(sdseal *s, sr *r, sdindexheader *h)
 }
 
 #endif
-#line 1 "sophia/database/sd_build.h"
 #ifndef SD_BUILD_H_
 #define SD_BUILD_H_
 
@@ -17597,7 +17504,6 @@ int sd_buildwrite(sdbuild*, sr*, sdindex*, srfile*);
 int sd_buildwritepage(sdbuild*, sr*, srbuf*);
 
 #endif
-#line 1 "sophia/database/sd_c.h"
 #ifndef SD_C_H_
 #define SD_C_H_
 
@@ -17686,7 +17592,6 @@ sd_censure(sdc *c, sr *r, int count)
 }
 
 #endif
-#line 1 "sophia/database/sd_merge.h"
 #ifndef SD_MERGE_H_
 #define SD_MERGE_H_
 
@@ -17726,7 +17631,6 @@ int sd_merge(sdmerge*);
 int sd_mergecommit(sdmerge*, sdid*);
 
 #endif
-#line 1 "sophia/database/sd_iter.h"
 #ifndef SD_ITER_H_
 #define SD_ITER_H_
 
@@ -17898,7 +17802,6 @@ sd_iter_next(sriter *i)
 extern sriterif sd_iter;
 
 #endif
-#line 1 "sophia/database/sd_recover.h"
 #ifndef SD_RECOVER_H_
 #define SD_RECOVER_H_
 
@@ -17916,7 +17819,6 @@ int sd_recover_complete(sriter*);
 extern sriterif sd_recover;
 
 #endif
-#line 1 "sophia/database/sd_build.c"
 
 /*
  * sophia database
@@ -18177,7 +18079,6 @@ int sd_buildwrite(sdbuild *b, sr *r, sdindex *index, srfile *file)
 	}
 	return 0;
 }
-#line 1 "sophia/database/sd_index.c"
 
 /*
  * sophia database
@@ -18280,7 +18181,6 @@ int sd_indexcopy(sdindex *i, sr *r, sdindexheader *h)
 	i->h = (sdindexheader*)i->i.s;
 	return 0;
 }
-#line 1 "sophia/database/sd_indexiter.c"
 
 /*
  * sophia database
@@ -18301,7 +18201,6 @@ sriterif sd_indexiter =
 	.of    = sd_indexiter_of,
 	.next  = sd_indexiter_next
 };
-#line 1 "sophia/database/sd_iter.c"
 
 /*
  * sophia database
@@ -18322,7 +18221,6 @@ sriterif sd_iter =
 	.of      = sd_iter_of,
 	.next    = sd_iter_next
 };
-#line 1 "sophia/database/sd_merge.c"
 
 /*
  * sophia database
@@ -18450,7 +18348,6 @@ int sd_mergecommit(sdmerge *m, sdid *id)
 	sd_indexcommit(&m->index, m->r, id);
 	return 0;
 }
-#line 1 "sophia/database/sd_pageiter.c"
 
 /*
  * sophia database
@@ -18479,7 +18376,6 @@ sriterif sd_pageiterraw =
 	.of    = sd_pageiterraw_of,
 	.next  = sd_pageiterraw_next,
 };
-#line 1 "sophia/database/sd_recover.c"
 
 /*
  * sophia database
@@ -18642,7 +18538,6 @@ int sd_recover_complete(sriter *i)
 	sr_errorreset(i->r->e);
 	return 0;
 }
-#line 1 "sophia/database/sd_v.c"
 
 /*
  * sophia database
@@ -18706,7 +18601,6 @@ svif sd_vif =
 	.value     = sd_vifvalue,
 	.valuesize = sd_vifvaluesize
 };
-#line 1 "sophia/index/si_conf.h"
 #ifndef SI_CONF_H_
 #define SI_CONF_H_
 
@@ -18733,7 +18627,6 @@ struct siconf {
 };
 
 #endif
-#line 1 "sophia/index/si_zone.h"
 #ifndef SI_ZONE_H_
 #define SI_ZONE_H_
 
@@ -18807,7 +18700,6 @@ si_zonemap(sizonemap *m, uint32_t percent)
 }
 
 #endif
-#line 1 "sophia/index/si_branch.h"
 #ifndef SI_BRANCH_H_
 #define SI_BRANCH_H_
 
@@ -18861,7 +18753,6 @@ si_branchfree(sibranch *b, sr *r)
 }
 
 #endif
-#line 1 "sophia/index/si_node.h"
 #ifndef SI_NODE_H_
 #define SI_NODE_H_
 
@@ -18963,7 +18854,6 @@ si_nodeof(srrbnode *node) {
 }
 
 #endif
-#line 1 "sophia/index/si_planner.h"
 #ifndef SI_PLANNER_H_
 #define SI_PLANNER_H_
 
@@ -19043,7 +18933,6 @@ int si_plannerremove(siplanner*, int, sinode*);
 int si_planner(siplanner*, siplan*);
 
 #endif
-#line 1 "sophia/index/si.h"
 #ifndef SI_H_
 #define SI_H_
 
@@ -19092,7 +18981,6 @@ int si_plan(si*, siplan*);
 int si_execute(si*, sr*, sdc*, siplan*, uint64_t);
 
 #endif
-#line 1 "sophia/index/si_commit.h"
 #ifndef SI_COMMIT_H_
 #define SI_COMMIT_H_
 
@@ -19122,7 +19010,6 @@ void si_commit(sitx*);
 void si_write(sitx*, int);
 
 #endif
-#line 1 "sophia/index/si_cache.h"
 #ifndef SI_CACHE_H_
 #define SI_CACHE_H_
 
@@ -19285,7 +19172,6 @@ si_cachefollow(sicache *c)
 }
 
 #endif
-#line 1 "sophia/index/si_query.h"
 #ifndef SI_QUERY_H_
 #define SI_QUERY_H_
 
@@ -19322,7 +19208,6 @@ int si_query(siquery*);
 int si_querycommited(si*, sr*, sv*);
 
 #endif
-#line 1 "sophia/index/si_iter.h"
 #ifndef SI_ITER_H_
 #define SI_ITER_H_
 
@@ -19492,7 +19377,6 @@ si_iter_next(sriter *i)
 extern sriterif si_iter;
 
 #endif
-#line 1 "sophia/index/si_drop.h"
 #ifndef SI_DROP_H_
 #define SI_DROP_H_
 
@@ -19508,7 +19392,6 @@ int si_dropmark(si*, sr*);
 int si_drop(si*, sr*);
 
 #endif
-#line 1 "sophia/index/si_backup.h"
 #ifndef SI_BACKUP_H_
 #define SI_BACKUP_H_
 
@@ -19523,7 +19406,6 @@ int si_drop(si*, sr*);
 int si_backup(si*, sr*, sdc*, siplan*);
 
 #endif
-#line 1 "sophia/index/si_balance.h"
 #ifndef SI_BALANCE_H_
 #define SI_BALANCE_H_
 
@@ -19539,7 +19421,6 @@ int si_branch(si*, sr*, sdc*, siplan*, uint64_t);
 int si_compact(si*, sr*, sdc*, siplan*, uint64_t);
 
 #endif
-#line 1 "sophia/index/si_compaction.h"
 #ifndef SI_COMPACTION_H_
 #define SI_COMPACTION_H_
 
@@ -19555,7 +19436,6 @@ int si_compaction(si*, sr*, sdc*, uint64_t, sinode*, sriter*,
                   uint32_t, uint32_t);
 
 #endif
-#line 1 "sophia/index/si_track.h"
 #ifndef SI_TRACK_H_
 #define SI_TRACK_H_
 
@@ -19657,7 +19537,6 @@ si_trackremove(sitrack *t, sinode *n)
 }
 
 #endif
-#line 1 "sophia/index/si_recover.h"
 #ifndef SI_RECOVER_H_
 #define SI_RECOVER_H_
 
@@ -19673,7 +19552,6 @@ sinode *si_bootstrap(si*, sr*, uint32_t);
 int si_recover(si*, sr*);
 
 #endif
-#line 1 "sophia/index/si_profiler.h"
 #ifndef SI_PROFILER_H_
 #define SI_PROFILER_H_
 
@@ -19711,7 +19589,6 @@ int si_profilerend(siprofiler*);
 int si_profiler(siprofiler*);
 
 #endif
-#line 1 "sophia/index/si_backup.c"
 
 /*
  * sophia database
@@ -19783,7 +19660,6 @@ int si_backup(si *index, sr *r, sdc *c, siplan *plan)
 	si_unlock(index);
 	return 0;
 }
-#line 1 "sophia/index/si_balance.c"
 
 /*
  * sophia database
@@ -19980,7 +19856,6 @@ int si_compact(si *index, sr *r, sdc *c, siplan *plan, uint64_t vlsn)
 	}
 	return 0;
 }
-#line 1 "sophia/index/si.c"
 
 /*
  * sophia database
@@ -20101,7 +19976,6 @@ int si_execute(si *i, sr *r, sdc *c, siplan *plan, uint64_t vlsn)
 	}
 	return rc;
 }
-#line 1 "sophia/index/si_commit.c"
 
 /*
  * sophia database
@@ -20203,7 +20077,6 @@ next:
 		c--;
 	}
 }
-#line 1 "sophia/index/si_compaction.c"
 
 /*
  * sophia database
@@ -20582,7 +20455,6 @@ int si_compaction(si *index, sr *r, sdc *c, uint64_t vlsn,
 	si_unlock(index);
 	return 0;
 }
-#line 1 "sophia/index/si_drop.c"
 
 /*
  * sophia database
@@ -20671,7 +20543,6 @@ int si_drop(si *i, sr *r)
 	rc = si_dropof(conf, r);
 	return rc;
 }
-#line 1 "sophia/index/si_iter.c"
 
 /*
  * sophia database
@@ -20693,7 +20564,6 @@ sriterif si_iter =
 	.of    = si_iter_of,
 	.next  = si_iter_next
 };
-#line 1 "sophia/index/si_node.c"
 
 /*
  * sophia database
@@ -20933,7 +20803,6 @@ int si_nodecomplete(sinode *n, sr *r, siconf *conf)
 	}
 	return rc;
 }
-#line 1 "sophia/index/si_planner.c"
 
 /*
  * sophia database
@@ -21224,7 +21093,6 @@ int si_planner(siplanner *p, siplan *plan)
 	}
 	return -1;
 }
-#line 1 "sophia/index/si_profiler.c"
 
 /*
  * sophia database
@@ -21323,7 +21191,6 @@ int si_profiler(siprofiler *p)
 	si_profiler_histogram_branch(p);
 	return 0;
 }
-#line 1 "sophia/index/si_query.c"
 
 /*
  * sophia database
@@ -21703,7 +21570,6 @@ int si_querycommited(si *index, sr *r, sv *v)
 	rc = si_querycommited_branch(r, &node->self, v);
 	return rc;
 }
-#line 1 "sophia/index/si_recover.c"
 
 /*
  * sophia database
@@ -22122,7 +21988,6 @@ int si_recover(si *i, sr *r)
 	}
 	return si_recoverindex(i, r);
 }
-#line 1 "sophia/repository/se_conf.h"
 #ifndef SE_CONF_H_
 #define SE_CONF_H_
 
@@ -22144,7 +22009,6 @@ struct seconf {
 };
 
 #endif
-#line 1 "sophia/repository/se.h"
 #ifndef SE_H_
 #define SE_H_
 
@@ -22167,7 +22031,6 @@ int se_open(se*, sr*, seconf*);
 int se_close(se*, sr*);
 
 #endif
-#line 1 "sophia/repository/se.c"
 
 /*
  * sophia database
@@ -22305,7 +22168,6 @@ int se_close(se *e, sr *r)
 	(void)r;
 	return 0;
 }
-#line 1 "sophia/sophia/so_status.h"
 #ifndef SO_STATUS_H_
 #define SO_STATUS_H_
 
@@ -22419,7 +22281,6 @@ so_online(sostatus *s) {
 }
 
 #endif
-#line 1 "sophia/sophia/so_worker.h"
 #ifndef SO_WORKER_H_
 #define SO_WORKER_H_
 
@@ -22469,7 +22330,6 @@ so_workerstub_free(soworker *w, sr *r)
 }
 
 #endif
-#line 1 "sophia/sophia/so_obj.h"
 #ifndef SO_OBJ_H_
 #define SO_OBJ_H_
 
@@ -22646,7 +22506,6 @@ so_objcursor(soobj *o, ...) {
 }
 
 #endif
-#line 1 "sophia/sophia/so_objindex.h"
 #ifndef SO_OBJINDEX_H_
 #define SO_OBJINDEX_H_
 
@@ -22711,7 +22570,6 @@ so_objindex_first(soobjindex *i)
 }
 
 #endif
-#line 1 "sophia/sophia/so_ctlcursor.h"
 #ifndef SO_CTLCURSOR_H_
 #define SO_CTLCURSOR_H_
 
@@ -22736,7 +22594,6 @@ struct soctlcursor {
 soobj *so_ctlcursor_new(void*);
 
 #endif
-#line 1 "sophia/sophia/so_ctl.h"
 #ifndef SO_CTL_H_
 #define SO_CTL_H_
 
@@ -22806,7 +22663,6 @@ int   so_ctlserialize(soctl*, srbuf*);
 void *so_ctlreturn(src*, void*);
 
 #endif
-#line 1 "sophia/sophia/so_scheduler.h"
 #ifndef SO_SCHEDULER_H_
 #define SO_SCHEDULER_H_
 
@@ -22872,7 +22728,6 @@ int so_scheduler_backup(void*);
 int so_scheduler_call(void*);
 
 #endif
-#line 1 "sophia/sophia/so.h"
 #ifndef SO_H_
 #define SO_H_
 
@@ -22946,7 +22801,6 @@ so_of(soobj *o) {
 soobj *so_new(void);
 
 #endif
-#line 1 "sophia/sophia/so_request.h"
 #ifndef SO_REQUEST_H_
 #define SO_REQUEST_H_
 
@@ -22987,7 +22841,6 @@ sorequest *so_requestnew(so*, sorequestop, soobj*, sv*);
 sorequest *so_requestdispatch(so*);
 
 #endif
-#line 1 "sophia/sophia/so_v.h"
 #ifndef SO_V_H_
 #define SO_V_H_
 
@@ -23030,7 +22883,6 @@ soobj *so_vput(sov*, sv*);
 int    so_vimmutable(sov*);
 
 #endif
-#line 1 "sophia/sophia/so_db.h"
 #ifndef SO_DB_H_
 #define SO_DB_H_
 
@@ -23104,7 +22956,6 @@ void      so_dbunbind(so*, uint32_t);
 int       so_dbmalfunction(sodb *o);
 
 #endif
-#line 1 "sophia/sophia/so_recover.h"
 #ifndef SO_RECOVER_H_
 #define SO_RECOVER_H_
 
@@ -23122,7 +22973,6 @@ int so_recover(so*);
 int so_recover_repository(so*);
 
 #endif
-#line 1 "sophia/sophia/so_tx.h"
 #ifndef SO_TX_H_
 #define SO_TX_H_
 
@@ -23147,7 +22997,6 @@ soobj *so_txnew(so*);
 int    so_query(sorequest*);
 
 #endif
-#line 1 "sophia/sophia/so_cursor.h"
 #ifndef SO_CURSOR_H_
 #define SO_CURSOR_H_
 
@@ -23175,7 +23024,6 @@ struct socursor {
 soobj *so_cursornew(sodb*, uint64_t, va_list);
 
 #endif
-#line 1 "sophia/sophia/so_snapshot.h"
 #ifndef SO_SNAPSHOT_H_
 #define SO_SNAPSHOT_H_
 
@@ -23200,7 +23048,6 @@ soobj *so_snapshotnew(so*, uint64_t, char*);
 int    so_snapshotupdate(sosnapshot*);
 
 #endif
-#line 1 "sophia/sophia/sophia.h"
 #ifndef SOPHIA_H_
 #define SOPHIA_H_
 
@@ -23247,7 +23094,6 @@ SP_API void *sp_type(void*, ...);
 #endif
 
 #endif
-#line 1 "sophia/sophia/so.c"
 
 /*
  * sophia database
@@ -23466,7 +23312,6 @@ soobj *so_new(void)
 	so_scheduler_init(&e->sched, e);
 	return &e->o;
 }
-#line 1 "sophia/sophia/so_ctl.c"
 
 /*
  * sophia database
@@ -24439,7 +24284,6 @@ int so_ctlvalidate(soctl *c)
 	}
 	return 0;
 }
-#line 1 "sophia/sophia/so_ctlcursor.c"
 
 /*
  * sophia database
@@ -24602,7 +24446,6 @@ soobj *so_ctlcursor_new(void *o)
 	so_objindex_register(&e->ctlcursor, &c->o);
 	return &c->o;
 }
-#line 1 "sophia/sophia/so_cursor.c"
 
 /*
  * sophia databaso
@@ -24784,7 +24627,6 @@ error:
 		sr_free(&e->a_cursor, c);
 	return NULL;
 }
-#line 1 "sophia/sophia/so_db.c"
 
 /*
  * sophia database
@@ -25334,7 +25176,6 @@ int so_dbmalfunction(sodb *o)
 	so_statusset(&o->status, SO_MALFUNCTION);
 	return -1;
 }
-#line 1 "sophia/sophia/sophia.c"
 
 /*
  * sophia database
@@ -25636,7 +25477,6 @@ SP_API void *sp_type(void *o, ...)
 	va_end(args);
 	return h;
 }
-#line 1 "sophia/sophia/so_recover.c"
 
 /*
  * sophia database
@@ -25814,7 +25654,6 @@ int so_recover_repository(so *e)
 	ec->sync = 0;
 	return se_open(&e->se, &e->r, &e->seconf);
 }
-#line 1 "sophia/sophia/so_request.c"
 
 /*
  * sophia database
@@ -25959,7 +25798,6 @@ int so_requestcount(so *e)
 	sr_spinunlock(&e->reqlock);
 	return n;
 }
-#line 1 "sophia/sophia/so_scheduler.c"
 
 /*
  * sophia database
@@ -26794,7 +26632,6 @@ error:
 	sr_trace(&w->trace, "%s", "malfunction");
 	return -1;
 }
-#line 1 "sophia/sophia/so_snapshot.c"
 
 /*
  * sophia database
@@ -26936,7 +26773,6 @@ int so_snapshotupdate(sosnapshot *s)
 	s->t.id = id;
 	return 0;
 }
-#line 1 "sophia/sophia/so_tx.c"
 
 /*
  * sophia database
@@ -27519,7 +27355,6 @@ soobj *so_txnew(so *e)
 	so_objindex_register(&e->tx, &t->o);
 	return &t->o;
 }
-#line 1 "sophia/sophia/so_v.c"
 
 /*
  * sophia database
@@ -27746,7 +27581,6 @@ int so_vimmutable(sov *v)
 	v->flags |= SO_VIMMUTABLE;
 	return 0;
 }
-#line 1 "sophia/sophia/so_worker.c"
 
 /*
  * sophia database
