@@ -9,6 +9,7 @@ static void xm_tlv *internal__kv_batch = NULL;
 
 
 static int internal__kv_init = 0;
+static size_t internal__kv_cachesize;
 
 int KVInitialize (size_t cacheSize) {
 	if (internal__kv_init)
@@ -38,6 +39,7 @@ int KVInitialize (size_t cacheSize) {
 
 	db.db = NULL;
 
+	internal__kv_cachesize = cacheSize;
 	internal__kv_init = 1;
 	return 0;
 
@@ -111,6 +113,9 @@ void KVDBDelete (void) {
 void KVDBClose (void) {
 	db.db = NULL;
 
+	KVTerminate ();
+	KVInitialize (internal__kv_cachesize);
+
 	return;
 }
 
@@ -128,6 +133,7 @@ void KVBatchCancel (void) {
 	if (internal__kv_batch_active)
 		sp_destroy (internal__kv_batch);
 
+	internal__kv_batch_active = 0;
 	return;
 }
 
@@ -199,7 +205,7 @@ int KVDelete (kv_string key) {
 	r |= sp_set (object, "key", key.data, key.len);
 
 	// commit deletion to database or add to transaction
-	r |= sp_delete (target);
+	r |= sp_delete (target, object);
 
 	return r;
 }
