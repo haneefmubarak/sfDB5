@@ -9,6 +9,12 @@ solution "sfDB5"
 		buildoptions {	"-Wno-pointer-sign",
 				"-Wno-unused-function",
 				"-Wno-unused-but-set-variable",
+				"-Wno-unused-parameter",
+				"-Wno-incompatible-pointer-types-discards-qualifiers",
+				"-Wno-discarded-qualifiers",
+				"-Wno-missing-field-initializers",
+				"-Wno-old-style-declaration",
+				"-Wno-unknown-warning-option",
 		}
 		linkoptions { "-pthread" }
 
@@ -19,6 +25,12 @@ solution "sfDB5"
 		buildoptions {	"-Wno-pointer-sign",
 				"-Wno-unused-function",
 				"-Wno-unused-but-set-variable",
+				"-Wno-unused-parameter",
+				"-Wno-incompatible-pointer-types-discards-qualifiers",
+				"-Wno-discarded-qualifiers",
+				"-Wno-missing-field-initializers",
+				"-Wno-old-style-declaration",
+				"-Wno-unknown-warning-option",
 		}
 		linkoptions { "-pthread" }
 
