@@ -1,3 +1,5 @@
 6446-6500
 
 6446 = client port
+6488 = server port
+6493 = heartbeat port
