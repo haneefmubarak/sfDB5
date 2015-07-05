@@ -12,5 +12,4 @@
 #include <unistd.h>
 
 #include "xm.h"
-#include "heartbeat.h"
 #include "server.h"
