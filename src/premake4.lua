@@ -15,6 +15,7 @@ solution "sfDB5"
 				"-Wno-missing-field-initializers",
 				"-Wno-old-style-declaration",
 				"-Wno-unknown-warning-option",
+				"-Wno-sign-compare",
 		}
 		linkoptions { "-pthread" }
 
@@ -31,6 +32,7 @@ solution "sfDB5"
 				"-Wno-missing-field-initializers",
 				"-Wno-old-style-declaration",
 				"-Wno-unknown-warning-option",
+				"-Wno-sign-compare",
 		}
 		linkoptions { "-pthread" }
 
