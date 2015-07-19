@@ -8,8 +8,9 @@
 #include <stdio.h>
 
 #include "kv/backend.h"
-#include "checksum.h"
-#include "query.h"
+#include "xm.h"
+#include "constants.h"
+#include "../deps/pbc/pbc.h"
 
 //===	Defines
 
@@ -74,6 +75,9 @@ static inline void StructureSortChildren (structure *s) {
 	structure_tim_sort (s->children, s->count);
 	return;
 }
+
+int StructureInitialize	(void);
+void StructureTerminate	(void);
 
 int StructureAddChildren	(structure *parent, const structure *children, int count);
 void StructureFree		(structure *s);

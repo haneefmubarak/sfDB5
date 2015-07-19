@@ -1,0 +1,21 @@
+// Defines the structure packing format (Protocol Buffers)
+//
+// must be compiled using the following commands in series if edited:
+// protoc structure.proto -o>(xxd -i > structure.format)
+// echo ', 0x00' >> structure.format
+
+package sfDB5;
+
+message Structure {
+	required string	name	= 1;
+	required uint32	type	= 2;
+
+	message Sub {
+		required string	name	= 1;
+		required uint32	type	= 2;
+		required bytes	value	= 3;
+	}
+
+	repeated Sub	entries	= 3;
+	optional bytes	value	= 4;
+}

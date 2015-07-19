@@ -43,3 +43,6 @@
 #define	SALT_LEN		(crypto_pwhash_scryptsalsa208sha256_SALTBYTES)
 #define	SCRYPT_OPS		(crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE)
 #define	SCRYPT_MEM		(crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE)
+
+// structures
+#define	STRUCTURE_PACK_MAX_SIZE	(1 << 24)	// 16 MB
