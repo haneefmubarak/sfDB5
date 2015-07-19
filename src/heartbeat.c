@@ -83,6 +83,8 @@ static void *internal__heartbeat_wake (void *p) {
 			clock_nanosleep (CLOCK_MONOTONIC, 0, &t, NULL);
 		}
 	}
+
+	return NULL;
 }
 
 

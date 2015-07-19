@@ -41,8 +41,12 @@ solution "sfDB5"
 		kind "ConsoleApp"
 		language "C"
 		files { "*.c", "*.h" }
-		includedirs { "../deps/sort" }
-		links { "kv", "pcre" }
+		includedirs {	"../deps/sort",
+				"../deps/pbc",
+		}
+		libdirs { "../deps/**" }
+		links { "kv", "pbc", "pcre", "sodium" }
+		os.execute ( "(cd ../deps/pbc/ && make)" )
 		
 
 	-- choose kv-backend
