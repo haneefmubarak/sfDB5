@@ -1,284 +1,526 @@
 #include "structure.h"
 
-void StructureFree (structure *s) {
-	internal__structure_free (*s);
-	free (s);
+static uint8_t internal__structure_proto[] = {
+#include "structure.format"
+};
+
+static struct pbc_env *pbc_env;
+
+int StructureInitialize (void) {
+	if (pbc_env)
+		return 0;
+
+	struct pbc_slice slice;
+	slice.buffer = internal__structure_proto;
+	slice.len = strlen (internal__structure_proto);
+
+	pbc_env = pbc_new ();
+	if (!pbc_env)
+		return -1;
+
+	return pbc_register (pbc_env, &slice);
+}
+
+void StructureTerminate (void) {
+	if (!pbc_env)
+		return;
+
+	pbc_delete (pbc_env);
+	pbc_env = NULL;
+
 	return;
 }
 
-static int internal__structure_get_size (const structure *s, uint16_t keylen, uint8_t depth,
-						uint32_t *entries, uint32_t *tbloffset) {
-	if (s->type == STRUCTURE_TYPE_NULL)
-		return 0;
-	else if (s->type > STRUCTURE_TYPE_UNIXTIME)
-		return 0;
+int StructureAddChildren (structure *parent, const structure *children, int count) {
+	if (parent->type != STRUCTURE_TYPE_SUB)
+		return 1;	// yeah lets not cause a memory issue
 
-	int error = 0;
+	// realloc () may lose data
+	structure *tmp = malloc ((parent->count + count) * sizeof (structure));
+	if (!tmp)
+		return -1;	// memory failure
 
-	if (depth == 0)
-		keylen += strlen (s->key);
-	else
-		keylen += 1 + strlen (s->key);	// "."
+	// copy over the old children
+	memcpy (tmp, parent->children, parent->count * sizeof (structure));
+	if (parent->count > 0)
+		free (parent->children);
+	parent->children = tmp;
 
-	if (*entries > (1024 * 1024) || keylen > 4096)
-		return 1;
+	// copy over the new children
+	memcpy (&parent->children[parent->count], children, count * sizeof (structure));
+	parent->count += count;
 
-	(*entries)++;
-	(*tbloffset) += sizeof (uint16_t) + keylen;
-
-	if (s->type == STRUCTURE_TYPE_SUB) {
-		depth++;
-		int x;
-		for (x = 0; x < s->count; x++) {
-			error = internal__structure_get_size (&s->children[x], keylen, depth,
-								entries, tbloffset);
-
-			if (error)
-				return error;
-		}
-	}
+	// resort the array to allow bsearch() to find members
+	structure_tim_sort (parent->children, parent->count);
 
 	return 0;
 }
 
-static int internal__structure_pack (structure *s, uint8_t *key, const uint8_t depth,
-					kv_string *packed, uint32_t *offset, uint32_t *tbloffset) {
-	if (s->type == STRUCTURE_TYPE_NULL)
-		return 0;
-	else if (s->type > STRUCTURE_TYPE_UNIXTIME)
-		return 0;
-
-	int error = 0;
-
-	if (depth == 0)
-		key = s->key;
-	else {
-		key = asprintf ("%s.%s", key, s->key);
-		if (!key)
-			return 1;
-	}
-
-	uint16_t keylen = strlen (key);
-
-	memcpy (&packed->data[*offset], keylen, sizeof (keylen));
-	*offset += sizeof (keylen);
-	memcpy (&packed->data[*offset], key, keylen);
-	*offset += keylen;
-
+void StructureFree (structure *s) {
 	switch (s->type) {
 		case STRUCTURE_TYPE_SUB: {
-			memcpy (&packed->data[*tbloffset], &s->type, sizeof (s->type));
-			*tbloffset += sizeof (s->type);
-
-			depth++;
 			int x;
 			for (x = 0; x < s->count; x++) {
-				error = internal__structure_pack (s, key, depth, packed,
-									offset, tbloffset);
+				switch (s->children[x].type) {
+					case STRUCTURE_TYPE_BLOB:
+					case STRUCTURE_TYPE_STRING: {
+						free (s->children[x].blob);
 
-				if (error) {
-					free (key);
-					return error;
+						break;
+					}
+
+					default: {
+						continue;
+					}
 				}
 			}
 
-			break;
+			// fallthrough
 		}
 
+		case STRUCTURE_TYPE_BLOB:
+		case STRUCTURE_TYPE_STRING: {
+			free (s->blob);
+
+			// fallthrough
+		}
+
+		case STRUCTURE_TYPE_NULL:
 		case STRUCTURE_TYPE_I64:
 		case STRUCTURE_TYPE_U64:
 		case STRUCTURE_TYPE_H64:
 		case STRUCTURE_TYPE_F64:
 		case STRUCTURE_TYPE_TIME:
-		case STRUCTURE_TYPE_UNIXTIME: {
-			if ((*tbloffset + sizeof (uint8_t) + sizeof (uint64_t)) > packed->len) {
-				packed->len *= 2;
-				void *p = realloc (packed->data, packed->len);
-
-				if (!p)
-					return -1;
-
-				packed->data = p;
-			}
-
-			memcpy (&packed->data[*tbloffset], &s->type, sizeof (s->type));
-			*tbloffset += sizeof (s->type);
-			memcpy (*packed->data[*tbloffset], &s->u64, sizeof (s->u64));
-			*tbloffset += sizeof (s->u64);
-
-			break;
-		}
-
-		case STRUCTURE_TYPE_BLOB:
-		case STRUCTURE_TYPE_STRING: {
-			if ((*tbloffset + sizeof (uint8_t) + sizeof (uint16_t) + s->len)
-					> packed->len)
-				packed->len *= 2;
-				void *p = realloc (packed->data, packed->len);
-
-				if (!p)
-					return -1;
-
-				packed->data = p;
-			}
-
-			memcpy (&packed->data[*tbloffset], &s->type, sizeof (s->type));
-			*tbloffset += sizeof (s->type);
-			memcpy (&packed->data[*tbloffset], &s->len, sizeof (s->len));
-			*tbloffset += sizeof (s->len);
-			memcpy (&packed->data[*tbloffset], s->blob, s->len);
-			*tbloffset += s->len;
+		case STRUCTURE_TYPE_UNIXTIME:
+		default: {
+			free (s->key);
+			free (s);
 
 			break;
 		}
 	}
 
-	free (key);
-	return 0;
+	return;
 }
 
 kv_string StructurePack (const structure *s) {
-	// Packed Format:
-	//
-	//	u32:	number of entries
-	//	u32:	key table byte size (member table offset)
-	//	[
-	//		u16:	length of member key
-	//			u8[]:	member key
-	//	]
-	//	[
-	//		u8:	type of member value
-	//		#u16:	length of member value	(if needed)
-	//			u8[]:	member value
-	//	]
-
 	const kv_string empty = { .data = NULL, .len = 0 };
 
-	uint32_t entries = 0, tbloffset = 0;
-	int error = internal__structure_get_size (s, 0, 0, &entries, &tbloffset);
-
-	if (error)
+	struct pbc_wmessage *msg = pbc_wmessage_new (pbc_env, "sfDB5.Structure");
+	if (xm_unlikely (!msg))
 		return empty;
+
+	if (xm_unlikely (s->type == STRUCTURE_TYPE_NULL)) {
+		pbc_wmessage_delete (msg);
+
+		return empty;
+	} else if (s->type != STRUCTURE_TYPE_SUB) {	// single type structure
+		int err = 0;
+
+		err |= pbc_wmessage_string (msg, "name", s->key, strnlen (s->key, 255));
+		err |= pbc_wmessage_integer (msg, "type", s->type, 0);
+
+		switch (s->type) {
+			case STRUCTURE_TYPE_BLOB:
+			case STRUCTURE_TYPE_STRING: {
+				err |= pbc_wmessage_string (msg, "value", s->blob, s->len);
+
+				break;
+			}
+
+			case STRUCTURE_TYPE_I64:
+			case STRUCTURE_TYPE_U64:
+			case STRUCTURE_TYPE_H64:
+			case STRUCTURE_TYPE_F64:
+			case STRUCTURE_TYPE_TIME:
+			case STRUCTURE_TYPE_UNIXTIME: {
+				err |= pbc_wmessage_string (msg, "value", (uint8_t *) &s->i64, sizeof (s->i64));
+
+				break;
+			}
+
+			default: {
+				err |= 1;
+				break;
+			}
+		}
+
+		// cleanup all at once
+		if (xm_unlikely (err)) {
+			pbc_wmessage_delete (msg);
+
+			return empty;
+		}
+
+		struct pbc_slice slice;
+		pbc_wmessage_buffer (msg, &slice);
+
+		if (slice.len > STRUCTURE_PACK_MAX_SIZE) {
+			pbc_wmessage_delete (msg);
+
+			return empty;
+		}
+
+		kv_string packed;
+		packed.len = slice.len;
+		packed.data = malloc (packed.len);
+		if (!packed.data) {
+			pbc_wmessage_delete (msg);
+
+			return empty;
+		}
+
+		memcpy (packed.data, slice.buffer, packed.len);
+		pbc_wmessage_delete (msg);
+
+		return packed;
+	}
+
+	// composite structure
+	int err = 0;
+
+	err |= pbc_wmessage_string (msg, "name", s->key, strnlen (s->key, 255));
+	err |= pbc_wmessage_integer (msg, "type", s->type, 0);
+
+	int x;
+	for (x = 0; x < s->count; x++) {
+		// only allow flat types
+		switch (s->children[x].type) {
+			case STRUCTURE_TYPE_BLOB:
+			case STRUCTURE_TYPE_STRING: {
+				struct pbc_wmessage *msg_sub = pbc_wmessage_message (msg, "entries");
+				if (xm_unlikely (!msg_sub)) {
+					pbc_wmessage_delete (msg);
+
+					return empty;
+				}
+
+				err |= pbc_wmessage_string (
+								msg_sub,
+								"name",
+								s->children[x].key,
+								strnlen (s->children[x].key, 255)
+								);
+				err |= pbc_wmessage_integer (
+								msg_sub,
+								"type",
+								s->children[x].type,
+								0
+								);
+				err |= pbc_wmessage_string (
+								msg_sub,
+								"value",
+								s->children[x].blob,
+								s->children[x].len
+								);
+
+				break;
+			}
+
+			case STRUCTURE_TYPE_I64:
+			case STRUCTURE_TYPE_U64:
+			case STRUCTURE_TYPE_H64:
+			case STRUCTURE_TYPE_F64:
+			case STRUCTURE_TYPE_TIME:
+			case STRUCTURE_TYPE_UNIXTIME: {
+				struct pbc_wmessage *msg_sub = pbc_wmessage_message (msg, "entries");
+				if (xm_unlikely (!msg_sub)) {
+					pbc_wmessage_delete (msg);
+
+					return empty;
+				}
+
+				err |= pbc_wmessage_string (
+								msg_sub,
+								"name",
+								s->children[x].key,
+								strnlen (s->children[x].key, 255)
+								);
+				err |= pbc_wmessage_integer (
+								msg_sub,
+								"type",
+								s->children[x].type,
+								0
+								);
+				err |= pbc_wmessage_string (
+								msg_sub,
+								"value",
+								(uint8_t *) &s->children[x].i64,
+								sizeof (s->children[x].i64)
+								);
+
+				break;
+			}
+
+			default: {
+				continue;	// jump to next item
+			}
+		}
+
+	}
+
+	if (xm_unlikely (err)) {
+		pbc_wmessage_delete (msg);
+
+		return empty;
+	}
+
+	struct pbc_slice slice;
+	pbc_wmessage_buffer (msg, &slice);
+
+	if (slice.len > STRUCTURE_PACK_MAX_SIZE) {
+		pbc_wmessage_delete (msg);
+
+		return empty;
+	}
 
 
 	kv_string packed;
-	tbloffset	+= 2 * sizeof (uint32_t)
-	packed.len	= 2 * tbloffset;	// mul2 is for initial memval room
-	packed.data	= malloc (packed.len);
-	if (!packed.data)
-		return empty;
+	packed.len = slice.len;
+	packed.data = malloc (packed.len);
+	if (!packed.data) {
+		pbc_wmessage_delete (msg);
 
-	uint32_t offset = 0;
-	memcpy (&packed.data[offset], &entries, sizeof (entries));
-	offset += sizeof (entries);
-	memcpy (&packed.data[offset], &tbloffset, sizeof (tbloffset));
-	offset += sizeof (tbloffset);
-
-	error = internal__structure_pack (s, NULL, 0, &packed, &offset, &tbloffset);
-
-	if (error) {
-		free (packed.data);
 		return empty;
 	}
+
+	memcpy (packed.data, slice.buffer, packed.len);
+	pbc_wmessage_delete (msg);
 
 	return packed;
 }
 
 structure *StructureUnpack (const kv_string packed) {
-	uint32_t offset = 0, tbloffset = 0;
+	// Packed Format:
+	//	u8:	structure name length
+	//	u8[]:	structure name
+	//	u8:	structure type
+	//	either (
+	//		u16:	number of entries
+	//		[
+	//			u8:	member name length
+	//			u8[]:	member name
+	//			u8:	member type
+	//			#u16:	member value length (if needed)
+	//			u8[]:	member value
+	//		]
+	//	) or (
+	//		#u16:	structure value length (if needed)
+	//		u8[]:	structure value
+	//	)
 
-	uint32_t entries;
-	memcpy (&entries, &packed.data[offset], sizeof (entries));
-	offset += sizeof (entries);
-	memcpy (&tbloffset, &packed.data[offset], sizeof (tbloffset));
-	offset += sizeof (tbloffset);
-
-	if (tbloffset <= packed.len) {
+	if (xm_unlikely (packed.lens > STRUCTURE_PACK_MAX_SIZE))
 		return NULL;
 
-	structure *unpacked = malloc (entries * sizeof (structure));
-	if (!unpacked)
+	struct pbc_slice slice;
+	slice.buffer = packed.data;
+	slice.len = packed.len;
+
+	struct pbc_rmessage *msg = pbc_rmessage_new (pbc_env, "sfDB5.Structure", &slice);
+	if (xm_unlikely (!msg))
 		return NULL;
 
-	int x;
-	structure *stack[256];
-	uint8_t depth = 0;
-	const uint8_t *prevpath[256] = { 0 };
-	for (x = 0; x < entries; x++) {
-		uint16_t pathlen;
-		memcpy (&pathlen, &packed.data[offset], sizeof (pathlen));
-		offset += sizeof (pathlen);
-		if (xm_unlikely ((offset + pathlen) > tbloffset))
-			goto StructureUnpackErrorCleanup;
+	structure *unpacked = calloc (1, sizeof (structure));
+	if (!unpacked) {
+		pbc_rmessage_delete (msg);
 
-		const uint8_t *path = calloc (1, pathlen + 1);
-		if (!path)
-			goto StructureUnpackErrorCleanup;
-		memcpy (path, &packed.data[offset], pathlen);
-
-		const uint8_t *curpath[256] = { 0 };
-		// if we are on the first token
-		if (x == 0) {
-			if (strchr (path, '.')) {
-				free (path);
-				return NULL;
-			}
-
-			stack[0] = calloc (1, sizeof (structure));
-			if (!stack[0]) {
-				free (path);
-				return NULL;
-			}
-
-			stack[0]->key = strdup (path);
-			if (!stack[0]->key) {
-				free (stack[0]);
-				free (path);
-				return NULL;
-			}
-
-			depth = 0;
-		} else {
-			// decompose the path into tokens
-			int y = 0, l = 0, n = 0;
-			while (path[y] != 0) {
-				while (path[y] != '.' && path[y] != 0)
-					y++;
-
-				curpath[n] = strndup (&path[y], y - l);
-				if (!curpath[n]) {
-					for (y = 0; y < n; y++)
-						free (curpath[y]);
-					goto StructureUnpackErrorCleanup;
-				}
-			}
-
-			// match the current path to the previous path
-			const uint8_t curpathlen = y;
-			while (
-		}
+		return NULL;
 	}
 
-	return stack[0];
+	uint8_t *ts;
+	int tslen;
+	ts = pbc_rmessage_string (msg, "name", 0, &tslen);
+	if (xm_unlikely (tslen <= 0)) {
+		pbc_rmessage_delete (msg);
+		free (unpacked);
 
-	StructureUnpackErrorCleanup:
-	int y;
-	for (y = 0; y < depth; y++)
-		free (prevpath[y]);
-	for (y = 0; y < x; y++) {
-		switch (unpacked[y]->type) {
+		return NULL;
+	}
+
+	unpacked->key = strndup (ts, xm_min (tslen, 255));
+	if (xm_unlikely (!unpacked->key)) {
+		pbc_rmessage_delete (msg);
+
+		free (unpacked);
+
+		return NULL;
+	}
+
+	unpacked->type = pbc_rmessage_integer (msg, "type", 0, NULL);
+
+	if (unpacked->type != STRUCTURE_TYPE_SUB) {	// flat structure
+		switch (unpacked->type) {
 			case STRUCTURE_TYPE_BLOB:
 			case STRUCTURE_TYPE_STRING: {
-				free (unpacked[y]->blob);
-				// fallthrough
+				ts = pbc_rmessage_string (msg, "value", 0, &tslen);
+				if (xm_unlikely (tslen <= 0)) {
+					pbc_rmessage_delete (msg);
+
+					free (unpacked->key);
+					free (unpacked);
+
+					return NULL;
+				}
+
+				unpacked->len = tslen;
+				unpacked->blob = malloc (tslen);
+				if (!unpacked->blob) {
+					pbc_rmessage_delete (msg);
+
+					free (unpacked->key);
+					free (unpacked);
+
+					return NULL;
+				}
+
+				memcpy (unpacked->blob, ts, unpacked->len);
+
+				pbc_rmessage_delete (msg);
+
+				return unpacked;
+			}
+
+			case STRUCTURE_TYPE_I64:
+			case STRUCTURE_TYPE_U64:
+			case STRUCTURE_TYPE_H64:
+			case STRUCTURE_TYPE_F64:
+			case STRUCTURE_TYPE_TIME:
+			case STRUCTURE_TYPE_UNIXTIME: {
+				ts = pbc_rmessage_string (msg, "value", 0, &tslen);
+				if (xm_unlikely (tslen != sizeof (unpacked->i64))) {
+					pbc_rmessage_delete (msg);
+
+					free (unpacked->key);
+					free (unpacked);
+
+					return NULL;
+				}
+
+				memcpy (&unpacked->i64, ts, tslen);
+
+				return unpacked;
 			}
 
 			default: {
-				free (unpacked[y]);
-				break;
+				pbc_rmessage_delete (msg);
+
+				free (unpacked->key);
+				free (unpacked);
+
+				return NULL;
 			}
 		}
 	}
 
-	return NULL;
+	// composite structure
+	tslen = pbc_rmessage_size (msg, "entries");
+	if (xm_unlikely (tslen <= 0)) {
+		pbc_rmessage_delete (msg);
+
+		free (unpacked->key);
+		free (unpacked);
+
+		return NULL;
+	}
+
+	unpacked->count = tslen;
+	unpacked->children = calloc (unpacked->count, sizeof (structure));
+	if (!unpacked->children) {
+		pbc_rmessage_delete (msg);
+
+		free (unpacked->key);
+		free (unpacked);
+
+		return NULL;
+	}
+
+	int x;
+	for (x = 0; x < unpacked->count; x++) {
+		struct pbc_rmessage *msg_sub = pbc_rmessage_message (msg, "entries", x);
+
+		ts = pbc_rmessage_string (msg_sub, "name", x, &tslen);
+		if (xm_unlikely (tslen <= 0)) {
+			pbc_rmessage_delete (msg);
+
+			// we can free everything but this since this has nothing allocated inside
+			unpacked->count = x;
+			StructureFree (unpacked);
+
+			return NULL;
+		}
+
+		unpacked->children[x].key = strndup (ts, xm_min (tslen, 255));
+		if (!unpacked->children[x].key) {
+			pbc_rmessage_delete (msg);
+
+			unpacked->count = x;
+			StructureFree (unpacked);
+
+			return NULL;
+		}
+
+		unpacked->children[x].type = pbc_rmessage_integer (msg_sub, "type", x, NULL);
+
+		switch (unpacked->children[x].type) {
+			case STRUCTURE_TYPE_BLOB:
+			case STRUCTURE_TYPE_STRING: {
+				ts = pbc_rmessage_string (msg_sub, "value", x, &tslen);
+				if (tslen <= 0) {
+					pbc_rmessage_delete (msg);
+
+					// hack to free the key
+					unpacked->children[x].type = STRUCTURE_TYPE_I64;
+					unpacked->count = x + 1;
+					StructureFree (unpacked);
+
+					return NULL;
+				}
+
+				unpacked->children[x].len = tslen;
+				unpacked->children[x].blob = malloc (unpacked->children[x].len);
+				if (!unpacked->children[x].blob) {
+					pbc_rmessage_delete (msg);
+
+					unpacked->children[x].type = STRUCTURE_TYPE_I64;
+					unpacked->count = x + 1;
+					StructureFree (unpacked);
+
+					return NULL;
+				}
+
+				memcpy (unpacked->children[x].blob, ts, unpacked->children[x].len);
+
+				// on to the next one
+				continue;
+			}
+
+			// encoding should have shipped only purely flat types
+			// and authentication should ensure that no injections occurred
+			default: {
+				ts = pbc_rmessage_string (msg_sub, "value", x, &tslen);
+				if (tslen != sizeof (unpacked->children[x].i64)) {
+					pbc_rmessage_delete (msg);
+
+					unpacked->count = x + 1;
+					StructureFree (unpacked);
+
+					return NULL;
+				}
+
+				memcpy (&unpacked->children[x].i64, ts, sizeof (unpacked->children[x].i64));
+
+				// and onto the next one
+				continue;
+			}
+		}
+	}
+
+	// libpbc cleanup
+	pbc_rmessage_delete (msg);
+
+	// get all of them in order
+	StructureSortChildren (unpacked);
+
+	// OMG we made it!
+	return unpacked;
 }

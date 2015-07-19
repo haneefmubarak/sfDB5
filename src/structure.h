@@ -7,10 +7,11 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <pbc.h>
+
 #include "kv/backend.h"
 #include "xm.h"
 #include "constants.h"
-#include "../deps/pbc/pbc.h"
 
 //===	Defines
 
