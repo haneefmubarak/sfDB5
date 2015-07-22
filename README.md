@@ -5,7 +5,7 @@ A NoSQL Schemaless Relational Key-Structure Store
 
 ---
 
-Have a look at the [transcribed talk](https://smarturl.it/sfDB5-talk).
+Have a look at the [transcribed talk](https://goo.gl/m6spq5).
 
 ---
 
@@ -56,7 +56,6 @@ You will need the following:
  - a working copy of [`git >= 1.8.5`](http://git-scm.com/downloads)
  - GNU `make >= 3.8`
  - [`premake4`](http://industriousone.com/premake/download)
- - an installed copy of [`rocksdb >= 3.7.0`](https://github.com/facebook/rocksdb/blob/master/INSTALL.md)
 
 Building
 --------
